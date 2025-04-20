@@ -5,7 +5,7 @@ import { AppBar, Box, Button, Container, IconButton, Menu, MenuItem, Toolbar, Ty
 import { useNavigate } from 'react-router-dom';
 import logo from "/remastered.webp"
 
-const pages = ['Products', 'Pricing', 'Blog'];
+const pages = ['Servicios', 'Horarios', 'Ubicación'];
 
 function ResponsiveAppBar() {
     const [anchorElNav, setAnchorElNav] = useState(null);
