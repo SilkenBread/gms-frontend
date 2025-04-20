@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import MenuIcon from '@mui/icons-material/Menu';
-import FitnessCenterIcon from '@mui/icons-material/FitnessCenter';
 import LoginIcon from '@mui/icons-material/Login';
 import { AppBar, Box, Button, Container, IconButton, Menu, MenuItem, Toolbar, Typography } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
+import logo from "/remastered.webp"
 
 const pages = ['Products', 'Pricing', 'Blog'];
 
@@ -26,7 +26,13 @@ function ResponsiveAppBar() {
         <AppBar position="static" sx={{ backgroundColor: '#000000' }}>
             <Container maxWidth="xl">
                 <Toolbar disableGutters>
-                    <FitnessCenterIcon sx={{ display: { xs: 'none', md: 'flex' }, mr: 1 }} />
+                <Box
+                component="img"
+                src={logo}
+                alt="Logo"
+                sx={{ display: { xs: 'none', md: 'flex' }, height: 40, mr: 1 }}
+                />
+            
                     <Typography
                         variant="h6"
                         noWrap
@@ -38,7 +44,7 @@ function ResponsiveAppBar() {
                             fontFamily: 'monospace',
                             fontWeight: 700,
                             letterSpacing: '.3rem',
-                            color: 'inherit',
+                            color: '#ffd303',
                             textDecoration: 'none',
                         }}
                     >
@@ -76,7 +82,12 @@ function ResponsiveAppBar() {
                         </Menu>
                     </Box>
 
-                    <FitnessCenterIcon sx={{ display: { xs: 'flex', md: 'none' }, mr: 1 }} />
+                    <Box
+                    component="img"
+                    src={logo}
+                    alt="Logo"
+                    sx={{ display: { xs: 'flex', md: 'none' }, height: 40, mr: 1 }}
+                    />
                     <Typography
                         variant="h5"
                         noWrap
@@ -89,7 +100,7 @@ function ResponsiveAppBar() {
                             fontFamily: 'monospace',
                             fontWeight: 700,
                             letterSpacing: '.3rem',
-                            color: 'inherit',
+                            color: '#ffd303',
                             textDecoration: 'none',
                         }}
                     >
