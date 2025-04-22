@@ -33,7 +33,7 @@ import KeyboardArrowRight from '@mui/icons-material/KeyboardArrowRight';
 import LastPageIcon from '@mui/icons-material/LastPage';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
-import { getMembers } from '../api/members_api';
+import { addMember, getMembers } from '../api/members_api';
 
 function TablePaginationActions(props) {
     const theme = useTheme();
@@ -72,6 +72,7 @@ TablePaginationActions.propTypes = {
 
 const cleanForm = {
     user: {
+        id: '',
         name: '',
         surname: '',
         email: '',
@@ -124,10 +125,10 @@ export default function ManageMember() {
         setSearchTerm(value);
         const filtered = rows.filter(
             (row) =>
-                row.name.toLowerCase().includes(value.toLowerCase()) ||
-                row.surname.toLowerCase().includes(value.toLowerCase()) ||
-                row.email.toLowerCase().includes(value.toLowerCase()) ||
-                row.id.includes(value)
+                row.user.name.toLowerCase().includes(value.toLowerCase()) ||
+                row.user.surname.toLowerCase().includes(value.toLowerCase()) ||
+                row.user.email.toLowerCase().includes(value.toLowerCase()) ||
+                row.user.id.includes(value)
         );
         setFilteredRows(filtered);
         setPage(0);
@@ -148,7 +149,7 @@ export default function ManageMember() {
     const handleDeleteMember = (id) => {
         const confirm = window.confirm("¿Estás seguro de eliminar este miembro?");
         if (confirm) {
-            const updated = rows.filter((row) => row.id !== id);
+            const updated = rows.filter((row) => row.user.id !== id);
             setRows(updated);
             setFilteredRows(updated.filter(
                 (row) =>
@@ -168,23 +169,42 @@ export default function ManageMember() {
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
-        setFormData(prev => ({ ...prev, [name]: value }));
+    
+        if (['id','name', 'surname', 'email', 'password'].includes(name)) {
+            setFormData(prev => ({
+                ...prev,
+                user: {
+                    ...prev.user,
+                    [name]: value
+                }
+            }));
+        } else {
+            setFormData(prev => ({
+                ...prev,
+                member: {
+                    ...prev.member,
+                    [name]: value
+                }
+            }));
+        }
     };
+    
 
-    const handleSaveMember = () => {
+    const handleSaveMember = async () => {
+        const newUser = { ...formData.user };
+        const newMember = { ...formData.member };
         if (isEditMode) {
-            const updated = rows.map((row) => row.id === formData.id ? formData : row);
+            const updated = rows.map((row) => row.user.id === formData.user.id ? formData : row);
             setRows(updated);
             setFilteredRows(updated);
         } else {
-            // const exists = rows.find((row) => row.id === formData.id);
-            // if (exists) {
-            //     alert("La cédula ya está registrada.");
-            //     return;
-            // }
             const newRows = [...rows, formData];
             setRows(newRows);
             setFilteredRows(newRows);
+            console.log("User: ", newUser)
+            console.log("Member",newMember)
+            const response = await addMember(newUser, newMember)
+            console.log(response)
         }
         handleCloseModal();
     };
@@ -206,6 +226,7 @@ export default function ManageMember() {
                 <Table>
                     <TableHead>
                         <TableRow sx={{ backgroundColor: '#f5f5f5' }}>
+                            <TableCell sx={{ textAlign: 'center' }}>Cédula</TableCell>
                             <TableCell sx={{ textAlign: 'center' }}>Nombre</TableCell>
                             <TableCell sx={{ textAlign: 'center' }}>Apellido</TableCell>
                             <TableCell sx={{ textAlign: 'center' }}>Correo</TableCell>
@@ -223,6 +244,7 @@ export default function ManageMember() {
                             : filteredRows
                         ).map((row) => (
                             <TableRow key={row.user.id}>
+                                <TableCell>{row.user.id}</TableCell>
                                 <TableCell>{row.user.name}</TableCell>
                                 <TableCell>{row.user.surname}</TableCell>
                                 <TableCell>{row.user.email}</TableCell>
@@ -277,6 +299,14 @@ export default function ManageMember() {
             <Dialog open={openModal} onClose={handleCloseModal} maxWidth="sm" fullWidth>
                 <DialogTitle>{isEditMode ? 'Editar Miembro' : 'Crear Miembro'}</DialogTitle>
                 <DialogContent>
+                <TextField
+                        label="Cédula"
+                        name="id"
+                        fullWidth
+                        margin="normal"
+                        value={formData.user.id}
+                        onChange={handleInputChange}
+                    />
                     <TextField
                         label="Nombre"
                         name="name"
@@ -329,10 +359,13 @@ export default function ManageMember() {
                             labelId="membership-type-label"
                             value={formData.member.membership_type}
                             onChange={(e) =>
-                                setFormData({
-                                    ...formData,
-                                    membership_type: e.target.value,
-                                })
+                                setFormData(prev => ({
+                                    ...prev,
+                                    member: {
+                                        ...prev.member,
+                                        membership_type: e.target.value
+                                    }
+                                }))
                             }
                             label="Tipo de membresía"
                         >
@@ -369,7 +402,7 @@ export default function ManageMember() {
                         control={
                             <Checkbox
                                 checked={formData.member.active_membership}
-                                onChange={(e) => setFormData(prev => ({ ...prev, membership_active: e.target.checked }))}
+                                onChange={(e) => setFormData(prev => ({ ...prev, active_membership: e.target.checked }))}
                                 color="primary"
                             />
                         }
