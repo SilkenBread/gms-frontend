@@ -4,7 +4,7 @@ import LooksOneIcon from '@mui/icons-material/LooksOne';
 import PeopleIcon from '@mui/icons-material/People';
 import SearchIcon from '@mui/icons-material/Search';
 import RedoIcon from '@mui/icons-material/Redo';
-import ManageUser from '../Components/ManageUsers';
+import ManageMember from '../Components/ManageMembers';
 
 export default function TrainerPage() {
     const [content, setContent] = useState(<p>Este es el contenido principal.</p>);
@@ -13,7 +13,7 @@ export default function TrainerPage() {
         {
             icon: <PeopleIcon />,
             text: 'Usuarios',
-            onClick: () => setContent(<ManageUser/>)
+            onClick: () => setContent(<ManageMember/>)
         },
         {
             icon: <LooksOneIcon />,
