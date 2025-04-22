@@ -33,7 +33,7 @@ import KeyboardArrowRight from '@mui/icons-material/KeyboardArrowRight';
 import LastPageIcon from '@mui/icons-material/LastPage';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
-import { addMember, getMembers } from '../api/members_api';
+import { addMember, getMembers, updateMember } from '../api/members_api';
 
 function TablePaginationActions(props) {
     const theme = useTheme();
@@ -169,8 +169,8 @@ export default function ManageMember() {
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
-    
-        if (['id','name', 'surname', 'email', 'password'].includes(name)) {
+
+        if (['id', 'name', 'surname', 'email', 'password'].includes(name)) {
             setFormData(prev => ({
                 ...prev,
                 user: {
@@ -188,23 +188,24 @@ export default function ManageMember() {
             }));
         }
     };
-    
+
 
     const handleSaveMember = async () => {
         const newUser = { ...formData.user };
         const newMember = { ...formData.member };
         if (isEditMode) {
+            console.log("Edit mode")
             const updated = rows.map((row) => row.user.id === formData.user.id ? formData : row);
             setRows(updated);
             setFilteredRows(updated);
+            console.log(formData)
+            const response = await updateMember(formData.user.id, formData)
+            console.log(response)
         } else {
             const newRows = [...rows, formData];
             setRows(newRows);
             setFilteredRows(newRows);
-            console.log("User: ", newUser)
-            console.log("Member",newMember)
-            const response = await addMember(newUser, newMember)
-            console.log(response)
+            await addMember(newUser, newMember)
         }
         handleCloseModal();
     };
@@ -299,7 +300,7 @@ export default function ManageMember() {
             <Dialog open={openModal} onClose={handleCloseModal} maxWidth="sm" fullWidth>
                 <DialogTitle>{isEditMode ? 'Editar Miembro' : 'Crear Miembro'}</DialogTitle>
                 <DialogContent>
-                <TextField
+                    <TextField
                         label="Cédula"
                         name="id"
                         fullWidth
@@ -338,7 +339,7 @@ export default function ManageMember() {
                         type="password"
                         fullWidth
                         margin="normal"
-                        value={formData.user.password}
+                        value={formData.user.password || ''}
                         onChange={handleInputChange}
                     />
                     <TextField
@@ -402,12 +403,21 @@ export default function ManageMember() {
                         control={
                             <Checkbox
                                 checked={formData.member.active_membership}
-                                onChange={(e) => setFormData(prev => ({ ...prev, active_membership: e.target.checked }))}
+                                onChange={(e) =>
+                                    setFormData(prev => ({
+                                        ...prev,
+                                        member: {
+                                            ...prev.member,
+                                            active_membership: e.target.checked
+                                        }
+                                    }))
+                                }
                                 color="primary"
                             />
                         }
                         label="Membresía activa"
                     />
+
                 </DialogContent>
 
                 <DialogActions>
