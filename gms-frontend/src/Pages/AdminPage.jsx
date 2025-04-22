@@ -6,7 +6,7 @@ import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import HandymanIcon from '@mui/icons-material/Handyman';
 import InfoIcon from '@mui/icons-material/Info';
-import ManageUser from '../Components/ManageUsers';
+import ManageMember from '../Components/ManageMembers';
 
 export default function AdminPage() {
   const [content, setContent] = useState(<p>Este es el contenido principal.</p>);
@@ -19,8 +19,8 @@ export default function AdminPage() {
     },
     {
       icon: <PeopleIcon />,
-      text: 'Usuarios',
-      onClick: () => setContent(<ManageUser/>)
+      text: 'Miembros',
+      onClick: () => setContent(<ManageMember/>)
     },
     {
       icon: <ExitToAppIcon />,

@@ -2,7 +2,7 @@ import ReusableDrawer from '../Components/SideBar';
 import PeopleIcon from '@mui/icons-material/People';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import { useState } from 'react';
-import ManageUser from '../Components/ManageUsers';
+import ManageMember from '../Components/ManageMembers';
 
 export default function RecepcionistPage() {
     const [content, setContent] = useState(<p>Este es el contenido principal.</p>);
@@ -15,7 +15,7 @@ export default function RecepcionistPage() {
         {
             icon: <PeopleIcon />,
             text: 'Usuarios',
-            onClick: () => setContent(<ManageUser/>)
+            onClick: () => setContent(<ManageMember/>)
         }
     ];
 
