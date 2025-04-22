@@ -120,7 +120,7 @@ const LoginPage = () => {
                             variant="contained"
                             sx={{
                                 mt: 3,
-                                backgroundColor: '#000',
+                                backgroundColor: '#ffd303',
                                 color: '#fff',
                                 borderRadius: '50px',
                                 '&:hover': {
