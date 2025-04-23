@@ -33,7 +33,7 @@ import KeyboardArrowRight from '@mui/icons-material/KeyboardArrowRight';
 import LastPageIcon from '@mui/icons-material/LastPage';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
-import { addMember, getMembers, updateMember } from '../api/members_api';
+import { addMember, getMembers, updateMember, deleteMember } from '../api/members_api';
 
 function TablePaginationActions(props) {
     const theme = useTheme();
@@ -146,11 +146,19 @@ export default function ManageMember() {
         setOpenModal(true);
     };
 
-    const handleDeleteMember = (id) => {
+    const handleDeleteMember = async (id) => {
         const confirm = window.confirm("¿Estás seguro de eliminar este miembro?");
         if (confirm) {
             const updated = rows.filter((row) => row.user.id !== id);
             setRows(updated);
+    
+            try {
+                const response = await deleteMember(id);
+                console.log(response);
+            } catch (error) {
+                console.error("Error eliminando miembro:", error);
+            }
+    
             setFilteredRows(updated.filter(
                 (row) =>
                     row.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
