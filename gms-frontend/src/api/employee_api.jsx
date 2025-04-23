@@ -29,7 +29,7 @@ export const addEmployee = async (employee) => {
                     hire_date: employee.employee.hire_date,
                     salary: employee.employee.salary
                 },
-                groups: [employee.groups]
+                groups: [employee.user.groups]
             }),            
         });
 
@@ -61,7 +61,7 @@ export const updateEmployee = async (employee) => {
                     hire_date: employee.employee.hire_date,
                     salary: employee.employee.salary
                 },
-                groups: [employee.groups]
+                groups: [employee.user.groups]
             }),      
         });
 

@@ -77,12 +77,12 @@ const cleanForm = {
         surname: '',
         email: '',
         password: '',
+        groups: ''
     },
     employee: {
         hire_date: '',
         salary: '',
-    },
-    groups: '',
+    }
 
 };
 
@@ -173,7 +173,7 @@ export default function ManageEmployees() {
     const handleInputChange = (e) => {
         const { name, value } = e.target;
 
-        if (['id', 'name', 'surname', 'email', 'password'].includes(name)) {
+        if (['id', 'name', 'surname', 'email', 'password', 'groups'].includes(name)) {
             setFormData(prev => ({
                 ...prev,
                 user: {
@@ -196,7 +196,6 @@ export default function ManageEmployees() {
     const handleSaveEmployee = async () => {
         console.log(formData)
         if (isEditMode) {
-            console.log("Edit mode")
             const updated = rows.map((row) => row.user.id === formData.user.id ? formData : row);
             setRows(updated);
             setFilteredRows(updated);
@@ -290,7 +289,7 @@ export default function ManageEmployees() {
 
             {/* Modal */}
             <Dialog open={openModal} onClose={handleCloseModal} maxWidth="sm" fullWidth>
-                <DialogTitle>{isEditMode ? 'Editar Miembro' : 'Crear trabajador'}</DialogTitle>
+                <DialogTitle>{isEditMode ? 'Editar trabajador' : 'Crear trabajador'}</DialogTitle>
                 <DialogContent>
                     <TextField
                         label="Cédula"
@@ -362,8 +361,8 @@ export default function ManageEmployees() {
                         <Select
                             labelId="group-label"
                             name="groups"
-                            value={formData.groups}
-                            onChange={(e) => setFormData(prev => ({ ...prev, groups: e.target.value }))}
+                            value={formData.user.groups}
+                            onChange={handleInputChange}
                         >
                             <MenuItem value="administrator">Administrador</MenuItem>
                             <MenuItem value="receptionist">Recepcionista</MenuItem>

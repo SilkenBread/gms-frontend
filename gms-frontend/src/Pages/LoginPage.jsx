@@ -69,7 +69,7 @@ const LoginPage = () => {
     
             
             switch (data.user.user_type) {
-                case 'admin':
+                case 'employee':
                     navigate('/admin');
                     break;
                 case 'recepcion':
