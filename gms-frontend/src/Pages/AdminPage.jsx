@@ -7,6 +7,7 @@ import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import HandymanIcon from '@mui/icons-material/Handyman';
 import InfoIcon from '@mui/icons-material/Info';
 import ManageMember from '../Components/ManageMembers';
+import ManageEmployees from '../Components/ManageEmployees';
 
 export default function AdminPage() {
   const [content, setContent] = useState(<p>Este es el contenido principal.</p>);
@@ -15,7 +16,7 @@ export default function AdminPage() {
     {
       icon: <EngineeringIcon />,
       text: 'Trabajadores',
-      onClick: () => setContent(<p>Sección de trabajadores</p>)
+      onClick: () => setContent(<ManageEmployees/>)
     },
     {
       icon: <PeopleIcon />,
