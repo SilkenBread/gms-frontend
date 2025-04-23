@@ -87,7 +87,7 @@ export default function ReusableDrawer({ title, icon, drawerItems = [], children
     return (
         <Box sx={{ display: 'flex' }}>
             <CssBaseline />
-            <AppBar position="fixed" open={open} sx={{color: 'black', background: 'yellow'}}>
+            <AppBar position="fixed" open={open} sx={{color: 'black', background: '#ffd303'}}>
                 <Toolbar>
                     <IconButton
                         color="inherit"

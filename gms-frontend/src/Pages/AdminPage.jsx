@@ -10,7 +10,7 @@ import ManageMember from '../Components/ManageMembers';
 import ManageEmployees from '../Components/ManageEmployees';
 
 export default function AdminPage() {
-  const [content, setContent] = useState(<p>Este es el contenido principal.</p>);
+  const [content, setContent] = useState(<h1>Bienvenido!</h1>);
 
   const drawerItems = [
     {
