@@ -33,7 +33,7 @@ import KeyboardArrowRight from '@mui/icons-material/KeyboardArrowRight';
 import LastPageIcon from '@mui/icons-material/LastPage';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
-import { addMember, deleteMember, getMembers, updateMember } from '../api/members_api';
+import { addEmployee, deleteEmployee, getEmployees, updateEmployee } from '../api/employee_api';
 
 function TablePaginationActions(props) {
     const theme = useTheme();
@@ -78,16 +78,15 @@ const cleanForm = {
         email: '',
         password: '',
     },
-    member: {
-        birth_date: '',
-        registration_date: '',
-        active_membership: true,
-        membership_end_date: '',
-        membership_type: '',
-    }
+    employee: {
+        hire_date: '',
+        salary: '',
+    },
+    groups: '',
+
 };
 
-export default function ManageMember() {
+export default function ManageEmployees() {
     const [page, setPage] = React.useState(0);
     const [rowsPerPage, setRowsPerPage] = React.useState(5);
     const [searchTerm, setSearchTerm] = React.useState('');
@@ -102,7 +101,8 @@ export default function ManageMember() {
     React.useEffect(() => {
         const cargarMiembros = async () => {
             try {
-                const data = await getMembers();
+                const data = await getEmployees();
+                console.log("Empleados: ", data)
                 setRows(data);
                 setFilteredRows(data)
             } catch (err) {
@@ -140,25 +140,17 @@ export default function ManageMember() {
         setOpenModal(true);
     };
 
-    const handleEditMember = (member) => {
-        setFormData(member);
+    const handleEditEmployee = (employee) => {
+        setFormData(employee);
         setIsEditMode(true);
         setOpenModal(true);
     };
 
-    const handleDeleteMember = async (id) => {
-        const confirm = window.confirm("¿Estás seguro de eliminar este miembro?");
+    const handleDeleteEmployee = async (id) => {
+        const confirm = window.confirm("¿Estás seguro de eliminar este empleado?");
         if (confirm) {
             const updated = rows.filter((row) => row.user.id !== id);
             setRows(updated);
-    
-            try {
-                const response = await deleteMember(id);
-                console.log(response);
-            } catch (error) {
-                console.error("Error eliminando miembro:", error);
-            }
-    
             setFilteredRows(updated.filter(
                 (row) =>
                     row.user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -166,8 +158,9 @@ export default function ManageMember() {
                     row.user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
                     row.user.id.includes(searchTerm)
             ));
-            const response = await deleteMember(id)
+            const response = await deleteEmployee(id)
             window.confirm(response.message);
+            
         }
     };
 
@@ -191,8 +184,8 @@ export default function ManageMember() {
         } else {
             setFormData(prev => ({
                 ...prev,
-                member: {
-                    ...prev.member,
+                employee: {
+                    ...prev.employee,
                     [name]: value
                 }
             }));
@@ -200,22 +193,20 @@ export default function ManageMember() {
     };
 
 
-    const handleSaveMember = async () => {
-        const newUser = { ...formData.user };
-        const newMember = { ...formData.member };
+    const handleSaveEmployee = async () => {
+        console.log(formData)
         if (isEditMode) {
             console.log("Edit mode")
             const updated = rows.map((row) => row.user.id === formData.user.id ? formData : row);
             setRows(updated);
             setFilteredRows(updated);
-            console.log(formData)
-            const response = await updateMember(formData.user.id, formData)
+            const response = await updateEmployee(formData)
             window.confirm(response.message);
         } else {
             const newRows = [...rows, formData];
             setRows(newRows);
             setFilteredRows(newRows);
-            const response = await addMember(newUser, newMember)
+            const response = await addEmployee(formData)
             window.confirm(response.message);
         }
         handleCloseModal();
@@ -224,7 +215,7 @@ export default function ManageMember() {
     return (
         <Box sx={{ padding: 3 }}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                <Typography variant="h5">Gestión de miembros</Typography>
+                <Typography variant="h5">Gestión de trabajadores</Typography>
                 <TextField
                     size="small"
                     placeholder="Buscar..."
@@ -238,16 +229,13 @@ export default function ManageMember() {
                 <Table>
                     <TableHead>
                         <TableRow sx={{ backgroundColor: '#f5f5f5' }}>
-                            <TableCell sx={{ textAlign: 'center' }}>Cédula</TableCell>
-                            <TableCell sx={{ textAlign: 'center' }}>Nombre</TableCell>
-                            <TableCell sx={{ textAlign: 'center' }}>Apellido</TableCell>
-                            <TableCell sx={{ textAlign: 'center' }}>Correo</TableCell>
-                            <TableCell sx={{ textAlign: 'center' }}>Fecha de nacimiento</TableCell>
-                            <TableCell sx={{ textAlign: 'center' }}>Fecha de registro</TableCell>
-                            <TableCell sx={{ textAlign: 'center' }}>Tipo membresía</TableCell>
-                            <TableCell sx={{ textAlign: 'center' }}>Membresía activa</TableCell>
-                            <TableCell sx={{ textAlign: 'center' }}>Fin membresía</TableCell>
-                            <TableCell sx={{ textAlign: 'center' }}>Acciones</TableCell>
+                            <TableCell>Cédula</TableCell>
+                            <TableCell>Nombre</TableCell>
+                            <TableCell>Apellido</TableCell>
+                            <TableCell>Correo</TableCell>
+                            <TableCell>Fecha Contratación</TableCell>
+                            <TableCell>Salario</TableCell>
+                            <TableCell>Acciones</TableCell>
                         </TableRow>
                     </TableHead>
                     <TableBody>
@@ -260,27 +248,13 @@ export default function ManageMember() {
                                 <TableCell>{row.user.name}</TableCell>
                                 <TableCell>{row.user.surname}</TableCell>
                                 <TableCell>{row.user.email}</TableCell>
-                                <TableCell>{row.member.birth_date}</TableCell>
-                                <TableCell>{row.member.registration_date}</TableCell>
+                                <TableCell>{row.employee.hire_date}</TableCell>
+                                <TableCell>{row.employee.salary}</TableCell>
                                 <TableCell>
-                                    {row.member.membership_type === 'monthly'
-                                    ? 'Mensual'
-                                    : row.member.membership_type === 'annual'
-                                    ? 'Anual'
-                                    : row.member.membership_type}
-                                </TableCell>
-
-                                <TableCell>
-                                    {row.member.active_membership
-                                        ? <Typography color="green">Activo</Typography>
-                                        : <Typography color="red">Inactivo</Typography>}
-                                </TableCell>
-                                <TableCell>{row.member.membership_end_date}</TableCell>
-                                <TableCell>
-                                    <IconButton onClick={() => handleEditMember(row)} color="primary">
+                                    <IconButton onClick={() => handleEditEmployee(row)} color="primary">
                                         <EditIcon />
                                     </IconButton>
-                                    <IconButton onClick={() => handleDeleteMember(row.user.id)} color="error">
+                                    <IconButton onClick={() => handleDeleteEmployee(row.user.id)} color="error">
                                         <DeleteIcon />
                                     </IconButton>
                                 </TableCell>
@@ -309,14 +283,14 @@ export default function ManageMember() {
                 </Table>
                 <Box sx={{ p: 2 }}>
                     <Button variant="contained" color="primary" onClick={handleOpenModal}>
-                        Crear Miembro
+                        Crear trabajador
                     </Button>
                 </Box>
             </TableContainer>
 
             {/* Modal */}
             <Dialog open={openModal} onClose={handleCloseModal} maxWidth="sm" fullWidth>
-                <DialogTitle>{isEditMode ? 'Editar Miembro' : 'Crear Miembro'}</DialogTitle>
+                <DialogTitle>{isEditMode ? 'Editar Miembro' : 'Crear trabajador'}</DialogTitle>
                 <DialogContent>
                     <TextField
                         label="Cédula"
@@ -360,87 +334,48 @@ export default function ManageMember() {
                         value={formData.user.password || ''}
                         onChange={handleInputChange}
                     />
-                    <TextField
-                        label="Fecha de nacimiento"
-                        name="birth_date"
-                        type="date"
-                        fullWidth
-                        margin="normal"
-                        value={formData.member.birth_date}
-                        onChange={handleInputChange}
-                        InputLabelProps={{
-                            shrink: true,
-                        }}
-                    />
-                    <FormControl fullWidth margin="normal">
-                        <InputLabel id="membership-type-label">Tipo de membresía</InputLabel>
-                        <Select
-                            labelId="membership-type-label"
-                            value={formData.member.membership_type}
-                            onChange={(e) =>
-                                setFormData(prev => ({
-                                    ...prev,
-                                    member: {
-                                        ...prev.member,
-                                        membership_type: e.target.value
-                                    }
-                                }))
-                            }
-                            label="Tipo de membresía"
-                        >
-                            <MenuItem value="monthly">Mensual</MenuItem>
-                            <MenuItem value="annual">Anual</MenuItem>
-                        </Select>
-                    </FormControl>
 
                     <TextField
-                        label="Fecha de registro"
-                        name="registration_date"
+                        label="Fecha de contratación"
+                        name="hire_date"
                         type="date"
                         fullWidth
                         margin="normal"
-                        value={formData.member.registration_date}
+                        value={formData.employee.hire_date}
                         onChange={handleInputChange}
                         InputLabelProps={{
                             shrink: true,
                         }}
                     />
                     <TextField
-                        label="Fecha de finalización de membresía"
-                        name="membership_end_date"
-                        type="date"
+                        label="Salario"
+                        name="salary"
+                        type="number"
+                        inputProps={{ step: "0.01" }}
                         fullWidth
                         margin="normal"
-                        value={formData.member.membership_end_date}
+                        value={formData.employee.salary}
                         onChange={handleInputChange}
-                        InputLabelProps={{
-                            shrink: true,
-                        }}
                     />
-                    <FormControlLabel
-                        control={
-                            <Checkbox
-                                checked={formData.member.active_membership}
-                                onChange={(e) =>
-                                    setFormData(prev => ({
-                                        ...prev,
-                                        member: {
-                                            ...prev.member,
-                                            active_membership: e.target.checked
-                                        }
-                                    }))
-                                }
-                                color="primary"
-                            />
-                        }
-                        label="Membresía activa"
-                    />
+                    <FormControl fullWidth margin="normal">
+                        <InputLabel id="role-label">Rol</InputLabel>
+                        <Select
+                            labelId="group-label"
+                            name="groups"
+                            value={formData.groups}
+                            onChange={(e) => setFormData(prev => ({ ...prev, groups: e.target.value }))}
+                        >
+                            <MenuItem value="administrator">Administrador</MenuItem>
+                            <MenuItem value="receptionist">Recepcionista</MenuItem>
+                            <MenuItem value="trainer">Entrenador</MenuItem>
+                        </Select>
+                    </FormControl>
 
                 </DialogContent>
 
                 <DialogActions>
                     <Button onClick={handleCloseModal}>Cancelar</Button>
-                    <Button variant="contained" onClick={handleSaveMember}>
+                    <Button variant="contained" onClick={handleSaveEmployee}>
                         {isEditMode ? 'Actualizar' : 'Guardar'}
                     </Button>
                 </DialogActions>

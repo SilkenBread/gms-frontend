@@ -110,7 +110,7 @@ export const updateMember = async (id, data) => {
 
 export const deleteMember = async (id) => {
     try {
-        const response = await fetch(`http://localhost:8000/members/${id}/delete`, {
+        const response = await fetch(`http://localhost:8000/members/${id}/`, {
             method: 'DELETE',
         });
         if (!response.ok) {
