@@ -33,7 +33,7 @@ import KeyboardArrowRight from '@mui/icons-material/KeyboardArrowRight';
 import LastPageIcon from '@mui/icons-material/LastPage';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
-import { addMember, getMembers, updateMember, deleteMember } from '../api/members_api';
+import { loginUser, addMember, getMembers, updateMember, deleteMember } from '../api/members_api';
 
 function TablePaginationActions(props) {
     const theme = useTheme();

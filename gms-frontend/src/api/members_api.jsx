@@ -1,6 +1,33 @@
+
+export const loginUser = async (email, password) => {
+    try {
+        const response = await fetch("http://localhost:8000/login", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email, password }),
+        });
+
+        const data = await response.json();
+        if (data.token) {
+            localStorage.setItem("token", data.token);
+        }
+        return data;
+    } catch (error) {
+        console.error("Error en login:", error);
+        throw error;
+    }
+};
+
+const getAuthHeaders = () => {
+    const token = localStorage.getItem('accessToken');
+    return token ? { Authorization: `Bearer ${token}` } : {};
+};
+
 export const getMembers = async () => {
     try {
-        const response = await fetch('http://localhost:8000/members/');
+        const response = await fetch('http://localhost:8000/members/', {
+            headers: getAuthHeaders(),
+        });
         if (!response.ok) {
             throw new Error(`Error al obtener miembros: ${response.statusText}`);
         }
@@ -11,6 +38,7 @@ export const getMembers = async () => {
         throw error; 
     }
 };
+
 
 export const addMember = async (user, member) => {
     try {

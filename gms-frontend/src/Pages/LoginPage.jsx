@@ -10,6 +10,7 @@ import {
 import ResponsiveAppBar from '../Components/Navbar';
 import { useNavigate } from 'react-router-dom';
 
+//provisional dictionary
 const users = [
     { email: 'admin@correo.com', password: 'admin123', rol: 'admin' },
     { email: 'recepcionista@correo.com', password: 'recepcion123', rol: 'recepcion' },
@@ -30,24 +31,69 @@ const LoginPage = () => {
         return regex.test(email);
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
         setEmailError('');
         setPasswordError('');
         setLoginError('');
-
-        let isValid = true;
-
+    
         if (!validateEmail(email)) {
             setEmailError('Correo electrónico inválido.');
-            isValid = false;
+            return;
         }
-
+    
         if (password.trim() === '') {
             setPasswordError('La contraseña no puede estar vacía.');
-            isValid = false;
-        }        
+            return;
+        }
+    
+        
+        try {
+            const response = await fetch('http://localhost:8000/auth/login/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ email, password }),
+            });
+    
+            const data = await response.json();
+    
+            if (!response.ok) {
+                throw new Error(data.error || 'Error de autenticación');
+            }
+    
+            localStorage.setItem('accessToken', data.access);
+            localStorage.setItem('refreshToken', data.refresh);
+            localStorage.setItem('user', JSON.stringify(data.user));
+    
+            
+            switch (data.user.user_type) {
+                case 'admin':
+                    navigate('/admin');
+                    break;
+                case 'recepcion':
+                    navigate('/recepcionist');
+                    break;
+                case 'entrenador':
+                    navigate('/trainer');
+                    break;
+                case 'trabajador':
+                    navigate('/worker');
+                    break;
+                default:
+                    console.log('Bienvenido');
+                    break;
+            }
+        } catch (error) {
+            setLoginError(error.message);
+        }
 
+        /*
+        provisional dictionary
+        
+        let isValid = true;
+        
         if (isValid) {
             const user = users.find(
                 (u) => u.email === email && u.password === password
@@ -75,6 +121,8 @@ const LoginPage = () => {
                 setLoginError('Correo o contraseña incorrectos.');
             }
         }
+        */
+        
     };
 
 
