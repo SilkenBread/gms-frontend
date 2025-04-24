@@ -4,6 +4,7 @@ import LoginIcon from '@mui/icons-material/Login';
 import { AppBar, Box, Button, Container, IconButton, Menu, MenuItem, Toolbar, Typography } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import logo from "/remastered.webp"
+import { logout } from './auth';
 
 const pages = ['Servicios', 'Horarios', 'Ubicación'];
 
@@ -137,6 +138,15 @@ function ResponsiveAppBar() {
                             }}
                         >
                             Login
+                        </Button>
+
+                        <Button
+                            onClick={() => logout(navigate)}
+                            variant="contained"
+                            color="error"
+                            sx={{ marginLeft: 'auto' }}
+                        >
+                            Cerrar sesión
                         </Button>
 
 

@@ -10,6 +10,7 @@ import {
 import ResponsiveAppBar from '../Components/Navbar';
 import { useNavigate } from 'react-router-dom';
 
+
 //provisional dictionary
 const users = [
     { email: 'admin@correo.com', password: 'admin123', rol: 'admin' },
@@ -69,7 +70,7 @@ const LoginPage = () => {
     
             
             switch (data.user.user_type) {
-                case 'employee':
+                case 'admin':
                     navigate('/admin');
                     break;
                 case 'recepcion':
