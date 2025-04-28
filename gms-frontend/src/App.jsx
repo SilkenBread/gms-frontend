@@ -1,4 +1,4 @@
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import HomePage from "./Pages/HomePage";
 import AdminPage from "./Pages/AdminPage";
 import RecepcionistPage from "./Pages/RecepcionistPage";
@@ -6,18 +6,24 @@ import TrainerPage from "./Pages/TrainerPage";
 import WorkerPage from "./Pages/WorkerPage";
 import LoginPage from "./Pages/LoginPage";
 
+const PrivateRoute = ({ element }) => {
+  const token = localStorage.getItem('accessToken');
+  return token ? element : <Navigate to="/" />;
+};
+
+
 function App() {
   return (
-    <BrowserRouter>
+    <Router>
       <Routes>
         <Route path="/" element={<HomePage/>}/>
         <Route path="/login" element={<LoginPage/>}/>
-        <Route path="/admin" element={<AdminPage/>}/>
-        <Route path="/recepcionist" element={<RecepcionistPage/>}/>
-        <Route path="/trainer" element={<TrainerPage/>}/>
-        <Route path="/worker" element={<WorkerPage/>}/>
+        <Route path="/admin" element={<PrivateRoute element={<AdminPage />} />}/>
+        <Route path="/recepcionist" element={<PrivateRoute element={<RecepcionistPage />} />}/>
+        <Route path="/trainer" element={<PrivateRoute element={<TrainerPage />} />}/>
+        <Route path="/worker" element={<PrivateRoute element={<WorkerPage />} />}/>
       </Routes>
-    </BrowserRouter>
+    </Router>
   );
 }
 
