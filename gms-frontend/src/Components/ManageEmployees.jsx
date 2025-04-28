@@ -21,11 +21,12 @@ import {
     DialogActions,
     TextField,
     MenuItem,
-    FormControlLabel,
     InputLabel,
     Select,
     FormControl,
     Checkbox,
+    useMediaQuery,
+    Menu,
 } from '@mui/material';
 import FirstPageIcon from '@mui/icons-material/FirstPage';
 import KeyboardArrowLeft from '@mui/icons-material/KeyboardArrowLeft';
@@ -33,6 +34,7 @@ import KeyboardArrowRight from '@mui/icons-material/KeyboardArrowRight';
 import LastPageIcon from '@mui/icons-material/LastPage';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
+import MoreVertIcon from '@mui/icons-material/MoreVert';
 import { addEmployee, deleteEmployee, getEmployees, updateEmployee } from '../api/employee_api';
 
 function TablePaginationActions(props) {
@@ -86,6 +88,16 @@ const cleanForm = {
 
 };
 
+const columns = [
+    { id: 'id', label: 'Cédula' },
+    { id: 'name', label: 'Nombre' },
+    { id: 'surname', label: 'Apellido' },
+    { id: 'email', label: 'Email' },
+    { id: 'hire_date', label: 'Fecha de contratación' },
+    { id: 'salary', label: 'Salario' },
+];
+
+
 export default function ManageEmployees() {
     const [page, setPage] = React.useState(0);
     const [rowsPerPage, setRowsPerPage] = React.useState(5);
@@ -102,7 +114,6 @@ export default function ManageEmployees() {
         const cargarMiembros = async () => {
             try {
                 const data = await getEmployees();
-                console.log("Empleados: ", data)
                 setRows(data);
                 setFilteredRows(data)
             } catch (err) {
@@ -160,7 +171,7 @@ export default function ManageEmployees() {
             ));
             const response = await deleteEmployee(id)
             window.confirm(response.message);
-            
+
         }
     };
 
@@ -211,52 +222,117 @@ export default function ManageEmployees() {
         handleCloseModal();
     };
 
+    const isMobile = useMediaQuery('(max-width:600px)'); // Detect mobile
+
+    const [anchorEl, setAnchorEl] = React.useState(null);
+    const open = Boolean(anchorEl);
+
+    // Default visible columns for mobile
+    const [visibleColumns, setVisibleColumns] = React.useState(['id', 'name', 'actions']);
+
+    const handleMenuOpen = (event) => {
+        setAnchorEl(event.currentTarget);
+    };
+
+    const handleMenuClose = () => {
+        setAnchorEl(null);
+    };
+
+    const handleToggleColumn = (columnId) => {
+        if (visibleColumns.includes(columnId)) {
+            setVisibleColumns(prev => prev.filter(c => c !== columnId));
+        } else {
+            setVisibleColumns(prev => [...prev, columnId]);
+        }
+    };
+
+    const isColumnVisible = (columnId) => {
+        if (!isMobile) return true; // En desktop mostrar todas
+        return visibleColumns.includes(columnId);
+    };
+
     return (
         <Box sx={{ padding: 3 }}>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+            <Box
+                sx={{
+                    display: 'flex',
+                    flexDirection: { xs: 'column', sm: 'row' },
+                    justifyContent: 'space-between',
+                    alignItems: { xs: 'flex-start', sm: 'center' },
+                    mb: 2,
+                    gap: 2,
+                }}
+            >
+
                 <Typography variant="h5">Gestión de trabajadores</Typography>
-                <TextField
-                    size="small"
-                    placeholder="Buscar..."
-                    variant="outlined"
-                    value={searchTerm}
-                    onChange={handleSearchChange}
-                    sx={{ width: 250 }}
-                />
+                <Box sx={{ display: 'flex', gap: 1 }}>
+                    <TextField
+                        size="small"
+                        placeholder="Buscar..."
+                        variant="outlined"
+                        value={searchTerm}
+                        onChange={handleSearchChange}
+                        sx={{ width: 250 }}
+                    />
+                    {isMobile && (
+                        <>
+                            <IconButton onClick={handleMenuOpen}>
+                                <MoreVertIcon />
+                            </IconButton>
+                            <Menu anchorEl={anchorEl} open={open} onClose={handleMenuClose}>
+                                {columns.map((col) => (
+                                    <MenuItem key={col.id} onClick={() => handleToggleColumn(col.id)}>
+                                        <Checkbox checked={visibleColumns.includes(col.id)} />
+                                        {col.label}
+                                    </MenuItem>
+                                ))}
+                            </Menu>
+                        </>
+                    )}
+                </Box>
             </Box>
+
             <TableContainer component={Paper}>
                 <Table>
                     <TableHead>
-                        <TableRow sx={{ backgroundColor: '#f5f5f5' }}>
-                            <TableCell>Cédula</TableCell>
-                            <TableCell>Nombre</TableCell>
-                            <TableCell>Apellido</TableCell>
-                            <TableCell>Correo</TableCell>
-                            <TableCell>Fecha Contratación</TableCell>
-                            <TableCell>Salario</TableCell>
-                            <TableCell>Acciones</TableCell>
+                        <TableRow>
+                            {columns.map((col) => (
+                                isColumnVisible(col.id) && (
+                                    <TableCell key={col.id} sx={{ backgroundColor: '#f5f5f5' }}>
+                                        {col.label}
+                                    </TableCell>
+                                )
+                            ))}
+                            {isColumnVisible('actions') && (
+                                <TableCell sx={{ backgroundColor: '#f5f5f5' }}>
+                                    Acciones
+                                </TableCell>
+                            )}
                         </TableRow>
                     </TableHead>
+
                     <TableBody>
                         {(rowsPerPage > 0
                             ? filteredRows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                             : filteredRows
                         ).map((row) => (
                             <TableRow key={row.user.id}>
-                                <TableCell>{row.user.id}</TableCell>
-                                <TableCell>{row.user.name}</TableCell>
-                                <TableCell>{row.user.surname}</TableCell>
-                                <TableCell>{row.user.email}</TableCell>
-                                <TableCell>{row.employee.hire_date}</TableCell>
-                                <TableCell>{row.employee.salary}</TableCell>
-                                <TableCell>
-                                    <IconButton onClick={() => handleEditEmployee(row)} color="primary">
-                                        <EditIcon />
-                                    </IconButton>
-                                    <IconButton onClick={() => handleDeleteEmployee(row.user.id)} color="error">
-                                        <DeleteIcon />
-                                    </IconButton>
-                                </TableCell>
+                                {isColumnVisible('id') && <TableCell>{row.user.id}</TableCell>}
+                                {isColumnVisible('name') && <TableCell>{row.user.name}</TableCell>}
+                                {isColumnVisible('surname') && <TableCell>{row.user.surname}</TableCell>}
+                                {isColumnVisible('email') && <TableCell>{row.user.email}</TableCell>}
+                                {isColumnVisible('hire_date') && <TableCell>{row.employee.hire_date}</TableCell>}
+                                {isColumnVisible('salary') && <TableCell>{row.employee.salary}</TableCell>}
+                                {isColumnVisible('actions') && (
+                                    <TableCell>
+                                        <IconButton onClick={() => handleEditEmployee(row)} color="primary">
+                                            <EditIcon />
+                                        </IconButton>
+                                        <IconButton onClick={() => handleDeleteEmployee(row.user.id)} color="error">
+                                            <DeleteIcon />
+                                        </IconButton>
+                                    </TableCell>
+                                )}
                             </TableRow>
                         ))}
                         {emptyRows > 0 && (
@@ -265,6 +341,7 @@ export default function ManageEmployees() {
                             </TableRow>
                         )}
                     </TableBody>
+
                     <TableFooter>
                         <TableRow>
                             <TablePagination
@@ -274,7 +351,6 @@ export default function ManageEmployees() {
                                 page={page}
                                 onPageChange={handleChangePage}
                                 onRowsPerPageChange={handleChangeRowsPerPage}
-                                ActionsComponent={TablePaginationActions}
                                 colSpan={7}
                             />
                         </TableRow>
