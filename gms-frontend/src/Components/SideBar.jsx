@@ -10,6 +10,8 @@ import MenuIcon from '@mui/icons-material/Menu';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import LogoutIcon from '@mui/icons-material/Logout';
+import { logout } from './auth';
+import { Navigate } from 'react-router-dom';
 
 const drawerWidth = 240;
 
@@ -140,9 +142,7 @@ export default function ReusableDrawer({ title, icon, drawerItems = [], children
                 <List sx={{ mt: 'auto' }}>
                     <ListItem disablePadding sx={{ display: 'block' }}>
                         <ListItemButton
-                            onClick={() => {
-                                console.log('Logging out...');
-                            }}
+                            onClick={() => logout(navigate)}
                             sx={{
                                 minHeight: 48,
                                 justifyContent: open ? 'initial' : 'center',
