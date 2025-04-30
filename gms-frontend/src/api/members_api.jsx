@@ -40,6 +40,27 @@ export const getMembers = async () => {
     }
 };
 
+export const searchMember = async (id) => {
+    try {
+        const response = await fetch(`${URL_API}/members/${id}`, {
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
+            }
+        });
+
+        if(response.ok){
+            return true
+        }
+        return false
+
+
+    } catch (error) {
+        console.error('Error al obtener el miembro:', error);
+        throw error;  
+    }
+};
+
 
 export const addMember = async (user, member) => {
     try {

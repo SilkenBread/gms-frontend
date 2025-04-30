@@ -36,7 +36,8 @@ import LastPageIcon from '@mui/icons-material/LastPage';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
-import { addMember, deleteMember, getMembers, updateMember } from '../api/members_api';
+import { addMember, deleteMember, getMembers, searchMember, updateMember } from '../api/members_api';
+import { validateCedula, validateEmail, validatePassword } from '../utils/valitations';
 
 function TablePaginationActions(props) {
     const theme = useTheme();
@@ -114,18 +115,20 @@ export default function ManageMember() {
 
     const emptyRows = page > 0 ? Math.max(0, (1 + page) * rowsPerPage - filteredRows.length) : 0;
 
+    const cargarMiembros = async () => {
+        try {
+            const data = await getMembers();
+            setRows(data);
+            setFilteredRows(data);
+        } catch (err) {
+            console.log('No se pudieron cargar los miembros');
+        }
+    };
+
     React.useEffect(() => {
-        const cargarMiembros = async () => {
-            try {
-                const data = await getMembers();
-                setRows(data);
-                setFilteredRows(data)
-            } catch (err) {
-                console.log('No se pudieron cargar los miembros');
-            }
-        };
         cargarMiembros();
     }, []);
+
     const handleChangePage = (event, newPage) => {
         setPage(newPage);
     };
@@ -164,17 +167,9 @@ export default function ManageMember() {
     const handleDeleteMember = async (id) => {
         const confirm = window.confirm("¿Estás seguro de eliminar este miembro?");
         if (confirm) {
-            const updated = rows.filter((row) => row.user.id !== id);
-            setRows(updated);
-            setFilteredRows(updated.filter(
-                (row) =>
-                    row.user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                    row.user.surname.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                    row.user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                    row.user.id.includes(searchTerm)
-            ));
             const response = await deleteMember(id)
             window.confirm(response.message);
+            await cargarMiembros();
         }
     };
 
@@ -206,24 +201,64 @@ export default function ManageMember() {
         }
     };
 
+    const validateForm = async () => {
+        const { id, name, surname, email, password } = formData.user;
+        const { birth_date, registration_date, membership_end_date, membership_type } = formData.member;
+    
+        // Verificar que los campos no estén vacíos
+        if (!id || !name || !surname || !email || !birth_date || !membership_type || !registration_date || !membership_end_date) {
+            alert("Todos los campos son obligatorios.");
+            return false;
+        }
+    
+        // Validar cédula (formato)
+        const cedulaValidation = validateCedula(id);
+        if (cedulaValidation !== true) {
+            alert(cedulaValidation);
+            return false;
+        }
+    
+        // Validar correo electrónico
+        const emailValidation = validateEmail(email);
+        if (emailValidation !== true) {
+            alert(emailValidation);
+            return false;
+        }
+    
+        if (!isEditMode) {
+            // Validar si ya existe un miembro con esa cédula
+            const response = await searchMember(id);
+            if (response) {
+                alert("Esta cédula ya existe");
+                return false;
+            }
+    
+            // Validar contraseña solo si no está en modo edición
+            const passwordValidation = validatePassword(password);
+            if (passwordValidation !== true) {
+                alert(passwordValidation);
+                return false;
+            }
+        }
+    
+        return true;
+    };
+    
 
     const handleSaveMember = async () => {
+        if (!(await validateForm())) {
+            return;
+        }
         const newUser = { ...formData.user };
         const newMember = { ...formData.member };
         if (isEditMode) {
-            console.log("Edit mode")
-            const updated = rows.map((row) => row.user.id === formData.user.id ? formData : row);
-            setRows(updated);
-            setFilteredRows(updated);
-            console.log(formData)
             const response = await updateMember(formData.user.id, formData)
             window.confirm(response.message);
+            await cargarMiembros();
         } else {
-            const newRows = [...rows, formData];
-            setRows(newRows);
-            setFilteredRows(newRows);
             const response = await addMember(newUser, newMember)
             window.confirm(response.message);
+            await cargarMiembros();
         }
         handleCloseModal();
     };
