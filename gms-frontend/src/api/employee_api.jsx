@@ -23,6 +23,24 @@ export const getEmployees = async () => {
     }
 };
 
+export const searchEmployee = async (id) => {
+    try {
+        const response = await fetch(`${URL_API}/employees/${id}`, {
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
+            }
+        });
+
+        if(response.ok){
+            return true
+        }
+        return false
+    } catch (error) {
+        console.error('Error al obtener el miembro:', error);
+        throw error;  
+    }
+};
 
 export const addEmployee = async (employee) => {
     try {

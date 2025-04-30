@@ -35,7 +35,8 @@ import LastPageIcon from '@mui/icons-material/LastPage';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
-import { addEmployee, deleteEmployee, getEmployees, updateEmployee } from '../api/employee_api';
+import { addEmployee, deleteEmployee, getEmployees, searchEmployee, updateEmployee } from '../api/employee_api';
+import { validateCedula, validateEmail, validatePassword } from '../utils/valitations';
 
 function TablePaginationActions(props) {
     const theme = useTheme();
@@ -108,19 +109,21 @@ export default function ManageEmployees() {
     const [formData, setFormData] = React.useState(cleanForm);
 
     const emptyRows = page > 0 ? Math.max(0, (1 + page) * rowsPerPage - filteredRows.length) : 0;
-
+    
+    const cargarEmpleados = async () => {
+        try {
+            const data = await getEmployees();
+            setRows(data);
+            setFilteredRows(data)
+        } catch (err) {
+            console.log('No se pudieron cargar los empleados');
+        }
+    };
+    
     React.useEffect(() => {
-        const cargarMiembros = async () => {
-            try {
-                const data = await getEmployees();
-                setRows(data);
-                setFilteredRows(data)
-            } catch (err) {
-                console.log('No se pudieron cargar los miembros');
-            }
-        };
-        cargarMiembros();
+        cargarEmpleados();
     }, []);
+
     const handleChangePage = (event, newPage) => {
         setPage(newPage);
     };
@@ -159,18 +162,9 @@ export default function ManageEmployees() {
     const handleDeleteEmployee = async (id) => {
         const confirm = window.confirm("¿Estás seguro de eliminar este empleado?");
         if (confirm) {
-            const updated = rows.filter((row) => row.user.id !== id);
-            setRows(updated);
-            setFilteredRows(updated.filter(
-                (row) =>
-                    row.user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                    row.user.surname.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                    row.user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                    row.user.id.includes(searchTerm)
-            ));
             const response = await deleteEmployee(id)
             window.confirm(response.message);
-
+            await cargarEmpleados()
         }
     };
 
@@ -182,7 +176,6 @@ export default function ManageEmployees() {
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
-
         if (['id', 'name', 'surname', 'email', 'password', 'groups'].includes(name)) {
             setFormData(prev => ({
                 ...prev,
@@ -202,21 +195,62 @@ export default function ManageEmployees() {
         }
     };
 
+    const validateForm = async () => {
+            const { id, name, surname, email, password, groups } = formData.user;
+            const { hire_date, salary } = formData.employee;
+        
+            // Verificar que los campos no estén vacíos
+            if (!id || !name || !surname || !email || !groups || !hire_date || !salary) {
+                alert("Todos los campos son obligatorios.");
+                return false;
+            }
+        
+            // Validar cédula (formato)
+            const cedulaValidation = validateCedula(id);
+            if (cedulaValidation !== true) {
+                alert(cedulaValidation);
+                return false;
+            }
+        
+            // Validar correo electrónico
+            const emailValidation = validateEmail(email);
+            if (emailValidation !== true) {
+                alert(emailValidation);
+                return false;
+            }
+        
+            if (!isEditMode) {
+                // Validar si ya existe un empleado con esa cédula
+                const response = await searchEmployee(id);
+                if (response) {
+                    alert("Esta cédula ya existe");
+                    return false;
+                }
+        
+                // Validar contraseña solo si no está en modo edición
+                const passwordValidation = validatePassword(password);
+                if (passwordValidation !== true) {
+                    alert(passwordValidation);
+                    return false;
+                }
+            }
+        
+            return true;
+        };
 
     const handleSaveEmployee = async () => {
+        if(!(await validateForm())){
+            return;
+        }
         console.log("Por guardar: ",formData)
         if (isEditMode) {
-            const updated = rows.map((row) => row.user.id === formData.user.id ? formData : row);
-            setRows(updated);
-            setFilteredRows(updated);
             const response = await updateEmployee(formData)
             window.confirm(response.message);
+            await cargarEmpleados()
         } else {
-            const newRows = [...rows, formData];
-            setRows(newRows);
-            setFilteredRows(newRows);
             const response = await addEmployee(formData)
             window.confirm(response.message);
+            await cargarEmpleados()
         }
         handleCloseModal();
     };
