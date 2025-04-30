@@ -1,9 +1,20 @@
 export const getEmployees = async () => {
     try {
-        const response = await fetch('http://localhost:8000/employees/');
+        const response = await fetch('http://localhost:8000/employees/', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
+            }
+        });
+
         if (!response.ok) {
-            throw new Error(`Error al obtener empleados: ${response.statusText}`);
+            const errorText = await response.text();
+            console.error('Detalles del error:', errorText);
+            throw new Error(`Error al actualizar empleado: ${response.status} ${response.statusText}`);
         }
+        
+
         const data = await response.json();
         return data; 
     } catch (error) {
@@ -12,11 +23,15 @@ export const getEmployees = async () => {
     }
 };
 
+
 export const addEmployee = async (employee) => {
     try {
         const response = await fetch('http://localhost:8000/employees/', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
+            },
             body: JSON.stringify({
                 user: {
                     id: employee.user.id,
@@ -34,6 +49,8 @@ export const addEmployee = async (employee) => {
         });
 
         if (!response.ok) {
+            const errorText = await response.text();
+            console.error('Detalles del error:', errorText);
             throw new Error(`Error al agregar empleado: ${response.statusText}`);
         }
 
@@ -48,7 +65,10 @@ export const updateEmployee = async (employee) => {
     try {
         const response = await fetch(`http://localhost:8000/employees/${employee.user.id}/`, {
             method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
+            },
             body: JSON.stringify({
                 user: {
                     id: employee.user.id,
@@ -61,13 +81,16 @@ export const updateEmployee = async (employee) => {
                     hire_date: employee.employee.hire_date,
                     salary: employee.employee.salary
                 },
-                groups: [employee.user.groups]
-            }),      
+                groups: employee.employee.groups
+            }),     
         });
 
         if (!response.ok) {
+            const errorText = await response.text(); // Esto te dará más detalles del error
+            console.error('Detalles del error:', errorText);
             throw new Error(`Error al actualizar empleado: ${response.statusText}`);
         }
+        
 
         return await response.json(); 
     } catch (error) {
@@ -80,10 +103,17 @@ export const deleteEmployee = async (id) => {
     try {
         const response = await fetch(`http://localhost:8000/employees/${id}/`, {
             method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
+            }
         });
+
         if (!response.ok) {
-            throw new Error(`Error al eliminar el empleado: ${response.statusText}`);
+            const errorText = await response.text(); // Esto te dará más detalles del error
+            console.error('Detalles del error:', errorText);
         }
+
         return await response.json(); 
     } catch (error) {
         console.error('Error al eliminar el empleado:', error);

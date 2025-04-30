@@ -166,14 +166,6 @@ export default function ManageMember() {
         if (confirm) {
             const updated = rows.filter((row) => row.user.id !== id);
             setRows(updated);
-
-            try {
-                const response = await deleteMember(id);
-                console.log(response);
-            } catch (error) {
-                console.error("Error eliminando miembro:", error);
-            }
-
             setFilteredRows(updated.filter(
                 (row) =>
                     row.user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -343,10 +335,10 @@ export default function ManageMember() {
                                 ))}
                                 {isColumnVisible('actions') && (
                                     <TableCell>
-                                        <IconButton onClick={() => handleEditMember(row)}>
+                                        <IconButton onClick={() => handleEditMember(row)} color="primary">
                                             <EditIcon />
                                         </IconButton>
-                                        <IconButton onClick={() => handleDeleteMember(row.user.id)}>
+                                        <IconButton onClick={() => handleDeleteMember(row.user.id)} color="error">
                                             <DeleteIcon />
                                         </IconButton>
                                     </TableCell>

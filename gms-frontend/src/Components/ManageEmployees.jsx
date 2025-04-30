@@ -85,7 +85,6 @@ const cleanForm = {
         hire_date: '',
         salary: '',
     }
-
 };
 
 const columns = [
@@ -205,7 +204,7 @@ export default function ManageEmployees() {
 
 
     const handleSaveEmployee = async () => {
-        console.log(formData)
+        console.log("Por guardar: ",formData)
         if (isEditMode) {
             const updated = rows.map((row) => row.user.id === formData.user.id ? formData : row);
             setRows(updated);
@@ -437,7 +436,7 @@ export default function ManageEmployees() {
                         <Select
                             labelId="group-label"
                             name="groups"
-                            value={formData.user.groups}
+                            value={formData.employee.groups}
                             onChange={handleInputChange}
                         >
                             <MenuItem value="administrator">Administrador</MenuItem>
