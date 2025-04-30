@@ -27,6 +27,8 @@ const LoginPage = () => {
     const [loginError, setLoginError] = useState('');
     const navigate = useNavigate();
 
+    const user = JSON.parse(localStorage.getItem('user'));
+
     const validateEmail = (email) => {
         const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         return regex.test(email);
@@ -67,31 +69,29 @@ const LoginPage = () => {
             localStorage.setItem('accessToken', data.access);
             localStorage.setItem('refreshToken', data.refresh);
             localStorage.setItem('user', JSON.stringify(data.user));
-    
-            console.log('Usuario guardado en localStorage:', localStorage.getItem('user'));
-            } catch (error) {
-                setLoginError(error.message);
-            }
 
-            switch (data.user.user_type) {
-                case 'admin':
-                    navigate('/admin');
-                    break;
-                case 'recepcion':
-                    navigate('/recepcionist');
-                    break;
-                case 'entrenador':
-                    navigate('/trainer');
-                    break;
-                case 'trabajador':
-                    navigate('/worker');
-                    break;
-                default:
-                    console.log('Bienvenido');
-                    break;
+            console.log('Usuario guardado en localStorage:', localStorage.getItem('user'));
+
+
+            if (user && user.user_type) {
+                switch (user.user_type) {
+                    case 'employee':
+                        navigate('/admin'); 
+                        break;
+                    case 'Member':
+                        navigate('/'); 
+                        break;
+                    default:
+                        console.log('Bienvenido');
+                        navigate('/'); 
+                        break;
+                }
+            } else {
+                console.log("Error: No se pudo obtener el tipo de usuario.");
             }
+            
         } catch (error) {
-            setLoginError(error.message);
+           setLoginError(error.message);
         }
 
         /*
