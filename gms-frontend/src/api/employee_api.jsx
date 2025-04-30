@@ -1,6 +1,7 @@
+export const URL_API = import.meta.env.VITE_API_URL
 export const getEmployees = async () => {
     try {
-        const response = await fetch('http://localhost:8000/employees/', {
+        const response = await fetch(`${URL_API}/employees/`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
@@ -14,7 +15,6 @@ export const getEmployees = async () => {
             throw new Error(`Error al actualizar empleado: ${response.status} ${response.statusText}`);
         }
         
-
         const data = await response.json();
         return data; 
     } catch (error) {
@@ -26,7 +26,7 @@ export const getEmployees = async () => {
 
 export const addEmployee = async (employee) => {
     try {
-        const response = await fetch('http://localhost:8000/employees/', {
+        const response = await fetch(`${URL_API}/employees/`, {
             method: 'POST',
             headers: { 
                 'Content-Type': 'application/json',
@@ -63,7 +63,7 @@ export const addEmployee = async (employee) => {
 
 export const updateEmployee = async (employee) => {
     try {
-        const response = await fetch(`http://localhost:8000/employees/${employee.user.id}/`, {
+        const response = await fetch(`${URL_API}/employees/${employee.user.id}/`, {
             method: 'PUT',
             headers: { 
                 'Content-Type': 'application/json',
@@ -101,7 +101,7 @@ export const updateEmployee = async (employee) => {
 
 export const deleteEmployee = async (id) => {
     try {
-        const response = await fetch(`http://localhost:8000/employees/${id}/`, {
+        const response = await fetch(`${URL_API}/employees/${id}/`, {
             method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json',

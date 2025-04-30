@@ -1,3 +1,4 @@
+import { URL_API } from "./employee_api";
 
 export const loginUser = async (email, password) => {
     try {
@@ -18,14 +19,9 @@ export const loginUser = async (email, password) => {
     }
 };
 
-const getAuthHeaders = () => {
-    const token = localStorage.getItem('accessToken');
-    return token ? { Authorization: `Bearer ${token}` } : {};
-};
-
 export const getMembers = async () => {
     try {
-        const response = await fetch('http://localhost:8000/members/', {
+        const response = await fetch(`${URL_API}/members/`, {
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
@@ -47,7 +43,7 @@ export const getMembers = async () => {
 
 export const addMember = async (user, member) => {
     try {
-        const response = await fetch('http://localhost:8000/members/', {
+        const response = await fetch(`${URL_API}/members/`, {
             method: 'POST',
             headers: { 
                 'Content-Type': 'application/json',
@@ -86,7 +82,7 @@ export const addMember = async (user, member) => {
 
 export const updateMember = async (id, data) => {
     try {
-        const response = await fetch(`http://localhost:8000/members/${id}/`, {
+        const response = await fetch(`${URL_API}/members/${id}/`, {
             method: 'PUT',
             headers: { 
                 'Content-Type': 'application/json',
@@ -124,7 +120,7 @@ export const updateMember = async (id, data) => {
 
 export const deleteMember = async (id) => {
     try {
-        const response = await fetch(`http://localhost:8000/members/${id}/`, {
+        const response = await fetch(`${URL_API}/members/${id}/`, {
             method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json',
