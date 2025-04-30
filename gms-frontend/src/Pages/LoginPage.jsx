@@ -68,7 +68,11 @@ const LoginPage = () => {
             localStorage.setItem('refreshToken', data.refresh);
             localStorage.setItem('user', JSON.stringify(data.user));
     
-            
+            console.log('Usuario guardado en localStorage:', localStorage.getItem('user'));
+            } catch (error) {
+                setLoginError(error.message);
+            }
+
             switch (data.user.user_type) {
                 case 'admin':
                     navigate('/admin');
