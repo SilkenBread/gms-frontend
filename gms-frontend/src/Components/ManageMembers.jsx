@@ -26,6 +26,8 @@ import {
     Select,
     FormControl,
     Checkbox,
+    useMediaQuery,
+    Menu,
 } from '@mui/material';
 import FirstPageIcon from '@mui/icons-material/FirstPage';
 import KeyboardArrowLeft from '@mui/icons-material/KeyboardArrowLeft';
@@ -33,7 +35,9 @@ import KeyboardArrowRight from '@mui/icons-material/KeyboardArrowRight';
 import LastPageIcon from '@mui/icons-material/LastPage';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
-import { addMember, deleteMember, getMembers, updateMember } from '../api/members_api';
+import MoreVertIcon from '@mui/icons-material/MoreVert';
+import { addMember, deleteMember, getMembers, searchMember, updateMember } from '../api/members_api';
+import { validateCedula, validateEmail, validatePassword } from '../utils/valitations';
 
 function TablePaginationActions(props) {
     const theme = useTheme();
@@ -87,6 +91,18 @@ const cleanForm = {
     }
 };
 
+const columns = [
+    { id: 'id', label: 'Cédula' },
+    { id: 'name', label: 'Nombre' },
+    { id: 'surname', label: 'Apellido' },
+    { id: 'email', label: 'Email' },
+    { id: 'birth_date', label: 'Fecha de cumpleaños' },
+    { id: 'registration_date', label: 'Fecha de registro' },
+    { id: 'active_membership', label: 'Membresía activa' },
+    { id: 'membership_type', label: 'Tipo de membresía' },
+    { id: 'membership_end_date', label: 'Fin de membresía' }
+];
+
 export default function ManageMember() {
     const [page, setPage] = React.useState(0);
     const [rowsPerPage, setRowsPerPage] = React.useState(5);
@@ -99,18 +115,20 @@ export default function ManageMember() {
 
     const emptyRows = page > 0 ? Math.max(0, (1 + page) * rowsPerPage - filteredRows.length) : 0;
 
+    const cargarMiembros = async () => {
+        try {
+            const data = await getMembers();
+            setRows(data);
+            setFilteredRows(data);
+        } catch (err) {
+            console.log('No se pudieron cargar los miembros');
+        }
+    };
+
     React.useEffect(() => {
-        const cargarMiembros = async () => {
-            try {
-                const data = await getMembers();
-                setRows(data);
-                setFilteredRows(data)
-            } catch (err) {
-                console.log('No se pudieron cargar los miembros');
-            }
-        };
         cargarMiembros();
     }, []);
+
     const handleChangePage = (event, newPage) => {
         setPage(newPage);
     };
@@ -149,25 +167,9 @@ export default function ManageMember() {
     const handleDeleteMember = async (id) => {
         const confirm = window.confirm("¿Estás seguro de eliminar este miembro?");
         if (confirm) {
-            const updated = rows.filter((row) => row.user.id !== id);
-            setRows(updated);
-    
-            try {
-                const response = await deleteMember(id);
-                console.log(response);
-            } catch (error) {
-                console.error("Error eliminando miembro:", error);
-            }
-    
-            setFilteredRows(updated.filter(
-                (row) =>
-                    row.user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                    row.user.surname.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                    row.user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                    row.user.id.includes(searchTerm)
-            ));
             const response = await deleteMember(id)
             window.confirm(response.message);
+            await cargarMiembros();
         }
     };
 
@@ -199,99 +201,193 @@ export default function ManageMember() {
         }
     };
 
+    const validateForm = async () => {
+        const { id, name, surname, email, password } = formData.user;
+        const { birth_date, registration_date, membership_end_date, membership_type } = formData.member;
+    
+        // Verificar que los campos no estén vacíos
+        if (!id || !name || !surname || !email || !birth_date || !membership_type || !registration_date || !membership_end_date) {
+            alert("Todos los campos son obligatorios.");
+            return false;
+        }
+    
+        // Validar cédula (formato)
+        const cedulaValidation = validateCedula(id);
+        if (cedulaValidation !== true) {
+            alert(cedulaValidation);
+            return false;
+        }
+    
+        // Validar correo electrónico
+        const emailValidation = validateEmail(email);
+        if (emailValidation !== true) {
+            alert(emailValidation);
+            return false;
+        }
+    
+        if (!isEditMode) {
+            // Validar si ya existe un miembro con esa cédula
+            const response = await searchMember(id);
+            if (response) {
+                alert("Esta cédula ya existe");
+                return false;
+            }
+    
+            // Validar contraseña solo si no está en modo edición
+            const passwordValidation = validatePassword(password);
+            if (passwordValidation !== true) {
+                alert(passwordValidation);
+                return false;
+            }
+        }
+    
+        return true;
+    };
+    
 
     const handleSaveMember = async () => {
+        if (!(await validateForm())) {
+            return;
+        }
         const newUser = { ...formData.user };
         const newMember = { ...formData.member };
         if (isEditMode) {
-            console.log("Edit mode")
-            const updated = rows.map((row) => row.user.id === formData.user.id ? formData : row);
-            setRows(updated);
-            setFilteredRows(updated);
-            console.log(formData)
             const response = await updateMember(formData.user.id, formData)
             window.confirm(response.message);
+            await cargarMiembros();
         } else {
-            const newRows = [...rows, formData];
-            setRows(newRows);
-            setFilteredRows(newRows);
             const response = await addMember(newUser, newMember)
             window.confirm(response.message);
+            await cargarMiembros();
         }
         handleCloseModal();
     };
 
+    const isMobile = useMediaQuery('(max-width:600px)'); // Detect mobile
+
+    const [anchorEl, setAnchorEl] = React.useState(null);
+    const open = Boolean(anchorEl);
+
+    // Default visible columns for mobile
+    const [visibleColumns, setVisibleColumns] = React.useState(['id', 'active_membership', 'membership_end_date', 'actions']);
+
+    const handleMenuOpen = (event) => {
+        setAnchorEl(event.currentTarget);
+    };
+
+    const handleMenuClose = () => {
+        setAnchorEl(null);
+    };
+
+    const handleToggleColumn = (columnId) => {
+        if (visibleColumns.includes(columnId)) {
+            setVisibleColumns(prev => prev.filter(c => c !== columnId));
+        } else {
+            setVisibleColumns(prev => [...prev, columnId]);
+        }
+    };
+
+    const isColumnVisible = (columnId) => {
+        if (!isMobile) return true; // En desktop mostrar todas
+        return visibleColumns.includes(columnId);
+    };
+
     return (
         <Box sx={{ padding: 3 }}>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+            <Box
+                sx={{
+                    display: 'flex',
+                    flexDirection: { xs: 'column', sm: 'row' },
+                    justifyContent: 'space-between',
+                    alignItems: { xs: 'flex-start', sm: 'center' },
+                    mb: 2,
+                    gap: 2,
+                }}
+            >
+
                 <Typography variant="h5">Gestión de miembros</Typography>
-                <TextField
-                    size="small"
-                    placeholder="Buscar..."
-                    variant="outlined"
-                    value={searchTerm}
-                    onChange={handleSearchChange}
-                    sx={{ width: 250 }}
-                />
+                <Box sx={{ display: 'flex', gap: 1 }}>
+                    <TextField
+                        size="small"
+                        placeholder="Buscar..."
+                        variant="outlined"
+                        value={searchTerm}
+                        onChange={handleSearchChange}
+                        sx={{ width: 250 }}
+                    />
+                    {isMobile && (
+                        <>
+                            <IconButton onClick={handleMenuOpen}>
+                                <MoreVertIcon />
+                            </IconButton>
+                            <Menu anchorEl={anchorEl} open={open} onClose={handleMenuClose}>
+                                {columns.map((col) => (
+                                    <MenuItem key={col.id} onClick={() => handleToggleColumn(col.id)}>
+                                        <Checkbox checked={visibleColumns.includes(col.id)} />
+                                        {col.label}
+                                    </MenuItem>
+                                ))}
+                            </Menu>
+                        </>
+                    )}
+                </Box>
             </Box>
+
             <TableContainer component={Paper}>
                 <Table>
                     <TableHead>
-                        <TableRow sx={{ backgroundColor: '#f5f5f5' }}>
-                            <TableCell sx={{ textAlign: 'center' }}>Cédula</TableCell>
-                            <TableCell sx={{ textAlign: 'center' }}>Nombre</TableCell>
-                            <TableCell sx={{ textAlign: 'center' }}>Apellido</TableCell>
-                            <TableCell sx={{ textAlign: 'center' }}>Correo</TableCell>
-                            <TableCell sx={{ textAlign: 'center' }}>Fecha de nacimiento</TableCell>
-                            <TableCell sx={{ textAlign: 'center' }}>Fecha de registro</TableCell>
-                            <TableCell sx={{ textAlign: 'center' }}>Tipo membresía</TableCell>
-                            <TableCell sx={{ textAlign: 'center' }}>Membresía activa</TableCell>
-                            <TableCell sx={{ textAlign: 'center' }}>Fin membresía</TableCell>
-                            <TableCell sx={{ textAlign: 'center' }}>Acciones</TableCell>
+                        <TableRow>
+                            {columns.map((col) => (
+                                isColumnVisible(col.id) && (
+                                    <TableCell key={col.id} sx={{ backgroundColor: '#f5f5f5' }}>
+                                        {col.label}
+                                    </TableCell>
+                                )
+                            ))}
+                            {isColumnVisible('actions') && (
+                                <TableCell sx={{ backgroundColor: '#f5f5f5' }}>
+                                    Acciones
+                                </TableCell>
+                            )}
                         </TableRow>
                     </TableHead>
+
                     <TableBody>
                         {(rowsPerPage > 0
                             ? filteredRows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                             : filteredRows
                         ).map((row) => (
                             <TableRow key={row.user.id}>
-                                <TableCell>{row.user.id}</TableCell>
-                                <TableCell>{row.user.name}</TableCell>
-                                <TableCell>{row.user.surname}</TableCell>
-                                <TableCell>{row.user.email}</TableCell>
-                                <TableCell>{row.member.birth_date}</TableCell>
-                                <TableCell>{row.member.registration_date}</TableCell>
-                                <TableCell>
-                                    {row.member.membership_type === 'monthly'
-                                    ? 'Mensual'
-                                    : row.member.membership_type === 'annual'
-                                    ? 'Anual'
-                                    : row.member.membership_type}
-                                </TableCell>
-
-                                <TableCell>
-                                    {row.member.active_membership
-                                        ? <Typography color="green">Activo</Typography>
-                                        : <Typography color="red">Inactivo</Typography>}
-                                </TableCell>
-                                <TableCell>{row.member.membership_end_date}</TableCell>
-                                <TableCell>
-                                    <IconButton onClick={() => handleEditMember(row)} color="primary">
-                                        <EditIcon />
-                                    </IconButton>
-                                    <IconButton onClick={() => handleDeleteMember(row.user.id)} color="error">
-                                        <DeleteIcon />
-                                    </IconButton>
-                                </TableCell>
+                                {columns.map((col) => (
+                                    isColumnVisible(col.id) && (
+                                        <TableCell key={col.id}>
+                                            {col.id === 'active_membership'
+                                                ? (row.member.active_membership ? <Typography color="green">Activo</Typography>
+                                                    : <Typography color="red">Inactivo</Typography>)
+                                                : row.user[col.id] || row.member[col.id] || '-'}
+                                        </TableCell>
+                                    )
+                                ))}
+                                {isColumnVisible('actions') && (
+                                    <TableCell>
+                                        <IconButton onClick={() => handleEditMember(row)} color="primary">
+                                            <EditIcon />
+                                        </IconButton>
+                                        <IconButton onClick={() => handleDeleteMember(row.user.id)} color="error">
+                                            <DeleteIcon />
+                                        </IconButton>
+                                    </TableCell>
+                                )}
                             </TableRow>
                         ))}
+
                         {emptyRows > 0 && (
                             <TableRow style={{ height: 53 * emptyRows }}>
-                                <TableCell colSpan={7} />
+                                <TableCell colSpan={columns.length + 1} />
                             </TableRow>
                         )}
                     </TableBody>
+
                     <TableFooter>
                         <TableRow>
                             <TablePagination
