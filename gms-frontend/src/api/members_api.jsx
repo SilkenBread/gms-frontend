@@ -1,24 +1,5 @@
 import { URL_API } from "./employee_api";
 
-export const loginUser = async (email, password) => {
-    try {
-        const response = await fetch("http://localhost:8000/login", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ email, password }),
-        });
-
-        const data = await response.json();
-        if (data.token) {
-            localStorage.setItem("token", data.token);
-        }
-        return data;
-    } catch (error) {
-        console.error("Error en login:", error);
-        throw error;
-    }
-};
-
 export const getMembers = async () => {
     try {
         const response = await fetch(`${URL_API}/members/`, {

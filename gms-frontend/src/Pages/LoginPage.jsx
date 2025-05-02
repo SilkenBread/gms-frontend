@@ -9,6 +9,7 @@ import {
 } from '@mui/material';
 import ResponsiveAppBar from '../Components/Navbar';
 import { useNavigate } from 'react-router-dom';
+import { loginUser } from '../api/auth_api';
 
 const LoginPage = () => {
     const [email, setEmail] = useState('');
@@ -17,8 +18,6 @@ const LoginPage = () => {
     const [passwordError, setPasswordError] = useState('');
     const [loginError, setLoginError] = useState('');
     const navigate = useNavigate();
-
-    // const user = JSON.parse(localStorage.getItem('user'));
 
     const validateEmail = (email) => {
         const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -42,19 +41,7 @@ const LoginPage = () => {
         }
     
         try {
-            const response = await fetch('http://localhost:8000/auth/login/', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ email, password }),
-            });
-    
-            const data = await response.json();
-    
-            if (!response.ok) {
-                throw new Error(data.error || 'Error de autenticación');
-            }
+            const data = await loginUser(email,password)
     
             // Guardar en localStorage
             localStorage.setItem('accessToken', data.access);
