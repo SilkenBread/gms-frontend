@@ -10,15 +10,6 @@ import {
 import ResponsiveAppBar from '../Components/Navbar';
 import { useNavigate } from 'react-router-dom';
 
-
-//provisional dictionary
-const users = [
-    { email: 'admin@correo.com', password: 'admin123', rol: 'admin' },
-    { email: 'recepcionista@correo.com', password: 'recepcion123', rol: 'recepcion' },
-    { email: 'entrenador@correo.com', password: 'entrena123', rol: 'entrenador' },
-    { email: 'trabajador@correo.com', password: 'trabaja123', rol: 'trabajador' }
-];
-
 const LoginPage = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -27,7 +18,7 @@ const LoginPage = () => {
     const [loginError, setLoginError] = useState('');
     const navigate = useNavigate();
 
-    const user = JSON.parse(localStorage.getItem('user'));
+    // const user = JSON.parse(localStorage.getItem('user'));
 
     const validateEmail = (email) => {
         const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -50,7 +41,6 @@ const LoginPage = () => {
             return;
         }
     
-        
         try {
             const response = await fetch('http://localhost:8000/auth/login/', {
                 method: 'POST',
@@ -66,70 +56,37 @@ const LoginPage = () => {
                 throw new Error(data.error || 'Error de autenticación');
             }
     
+            // Guardar en localStorage
             localStorage.setItem('accessToken', data.access);
             localStorage.setItem('refreshToken', data.refresh);
             localStorage.setItem('user', JSON.stringify(data.user));
-
+    
             console.log('Usuario guardado en localStorage:', localStorage.getItem('user'));
-
-
+    
+            const user = data.user;
+    
             if (user && user.user_type) {
                 switch (user.user_type) {
                     case 'employee':
-                        navigate('/admin'); 
+                        navigate('/admin');
                         break;
                     case 'Member':
-                        navigate('/'); 
+                        navigate('/');
                         break;
                     default:
                         console.log('Bienvenido');
-                        navigate('/'); 
+                        navigate('/');
                         break;
                 }
             } else {
                 console.log("Error: No se pudo obtener el tipo de usuario.");
             }
-            
+    
         } catch (error) {
-           setLoginError(error.message);
+            setLoginError(error.message);
         }
-
-        /*
-        provisional dictionary
-        
-        let isValid = true;
-        
-        if (isValid) {
-            const user = users.find(
-                (u) => u.email === email && u.password === password
-            );
-
-            if (user) {
-                switch (user.rol) {
-                    case 'admin':
-                        navigate("/admin")
-                        break;
-                    case 'recepcion':
-                        navigate("/recepcionist")
-                        break;
-                    case 'entrenador':
-                        navigate("/trainer")
-                        break;
-                    case 'trabajador':
-                        navigate("/worker")
-                        break;
-                    default:
-                        console.log("Bienvenido")
-                        break;
-                }
-            } else {
-                setLoginError('Correo o contraseña incorrectos.');
-            }
-        }
-        */
-        
     };
-
+    
 
     return (
         <>
@@ -180,6 +137,7 @@ const LoginPage = () => {
                                     backgroundColor: '#333',
                                 },
                             }}
+                            typeof='submit'
                         >
                             Iniciar sesión
                         </Button>
