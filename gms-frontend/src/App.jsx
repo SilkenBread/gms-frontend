@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes, useNavigate } from 'react-router-dom';
 import HomePage from "./Pages/HomePage";
 import AdminPage from "./Pages/AdminPage";
 import RecepcionistPage from "./Pages/RecepcionistPage";
@@ -8,7 +8,9 @@ import LoginPage from "./Pages/LoginPage";
 
 const PrivateRoute = ({ element }) => {
   const token = localStorage.getItem('accessToken');
-  return token ? element : <Navigate to="/" />;
+  const navigate = useNavigate();
+
+  return token ? element : navigate("/");
 };
 
 
