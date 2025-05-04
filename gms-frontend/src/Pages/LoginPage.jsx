@@ -9,15 +9,7 @@ import {
 } from '@mui/material';
 import ResponsiveAppBar from '../Components/Navbar';
 import { useNavigate } from 'react-router-dom';
-
-
-//provisional dictionary
-const users = [
-    { email: 'admin@correo.com', password: 'admin123', rol: 'admin' },
-    { email: 'recepcionista@correo.com', password: 'recepcion123', rol: 'recepcion' },
-    { email: 'entrenador@correo.com', password: 'entrena123', rol: 'entrenador' },
-    { email: 'trabajador@correo.com', password: 'trabaja123', rol: 'trabajador' }
-];
+import { loginUser } from '../api/auth_api';
 
 const LoginPage = () => {
     const [email, setEmail] = useState('');
@@ -48,84 +40,40 @@ const LoginPage = () => {
             return;
         }
     
-        
         try {
-            const response = await fetch('http://localhost:8000/auth/login/', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ email, password }),
-            });
+            const data = await loginUser(email,password)
     
-            const data = await response.json();
-    
-            if (!response.ok) {
-                throw new Error(data.error || 'Error de autenticación');
-            }
-    
+            // Guardar en localStorage
             localStorage.setItem('accessToken', data.access);
             localStorage.setItem('refreshToken', data.refresh);
             localStorage.setItem('user', JSON.stringify(data.user));
     
-            
-            switch (data.user.user_type) {
-                case 'admin':
-                    navigate('/admin');
-                    break;
-                case 'recepcion':
-                    navigate('/recepcionist');
-                    break;
-                case 'entrenador':
-                    navigate('/trainer');
-                    break;
-                case 'trabajador':
-                    navigate('/worker');
-                    break;
-                default:
-                    console.log('Bienvenido');
-                    break;
-            }
-        } catch (error) {
-            setLoginError(error.message);
-        }
-
-        /*
-        provisional dictionary
-        
-        let isValid = true;
-        
-        if (isValid) {
-            const user = users.find(
-                (u) => u.email === email && u.password === password
-            );
-
-            if (user) {
-                switch (user.rol) {
-                    case 'admin':
-                        navigate("/admin")
+            console.log('Usuario guardado en localStorage:', localStorage.getItem('user'));
+    
+            const user = data.user;
+    
+            if (user && user.user_type) {
+                switch (user.user_type) {
+                    case 'employee':
+                        navigate('/admin');
                         break;
-                    case 'recepcion':
-                        navigate("/recepcionist")
-                        break;
-                    case 'entrenador':
-                        navigate("/trainer")
-                        break;
-                    case 'trabajador':
-                        navigate("/worker")
+                    case 'Member':
+                        navigate('/');
                         break;
                     default:
-                        console.log("Bienvenido")
+                        console.log('Bienvenido');
+                        navigate('/');
                         break;
                 }
             } else {
-                setLoginError('Correo o contraseña incorrectos.');
+                console.log("Error: No se pudo obtener el tipo de usuario.");
             }
+    
+        } catch (error) {
+            setLoginError(error.message);
         }
-        */
-        
     };
-
+    
 
     return (
         <>
@@ -176,6 +124,7 @@ const LoginPage = () => {
                                     backgroundColor: '#333',
                                 },
                             }}
+                            typeof='submit'
                         >
                             Iniciar sesión
                         </Button>

@@ -139,17 +139,6 @@ function ResponsiveAppBar() {
                         >
                             Login
                         </Button>
-
-                        <Button
-                            onClick={() => logout(navigate)}
-                            variant="contained"
-                            color="error"
-                            sx={{ marginLeft: 'auto' }}
-                        >
-                            Cerrar sesión
-                        </Button>
-
-
                     </Box>
                 </Toolbar>
             </Container>

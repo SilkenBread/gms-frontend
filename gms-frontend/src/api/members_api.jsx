@@ -1,35 +1,17 @@
-
-export const loginUser = async (email, password) => {
-    try {
-        const response = await fetch("http://localhost:8000/login", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ email, password }),
-        });
-
-        const data = await response.json();
-        if (data.token) {
-            localStorage.setItem("token", data.token);
-        }
-        return data;
-    } catch (error) {
-        console.error("Error en login:", error);
-        throw error;
-    }
-};
-
-const getAuthHeaders = () => {
-    const token = localStorage.getItem('accessToken');
-    return token ? { Authorization: `Bearer ${token}` } : {};
-};
+import { URL_API } from "./employee_api";
 
 export const getMembers = async () => {
     try {
-        const response = await fetch('http://localhost:8000/members/', {
-            headers: getAuthHeaders(),
+        const response = await fetch(`${URL_API}/members/`, {
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
+            }
         });
         if (!response.ok) {
-            throw new Error(`Error al obtener miembros: ${response.statusText}`);
+            const errorText = await response.text();
+            console.error('Detalles del error:', errorText);
+            throw new Error(`Error al actualizar empleado: ${response.status} ${response.statusText}`);
         }
         const data = await response.json();
         return data; 
@@ -39,12 +21,36 @@ export const getMembers = async () => {
     }
 };
 
+export const searchMember = async (id) => {
+    try {
+        const response = await fetch(`${URL_API}/members/${id}`, {
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
+            }
+        });
+
+        if(response.ok){
+            return true
+        }
+        return false
+
+
+    } catch (error) {
+        console.error('Error al obtener el miembro:', error);
+        throw error;  
+    }
+};
+
 
 export const addMember = async (user, member) => {
     try {
-        const response = await fetch('http://localhost:8000/members/', {
+        const response = await fetch(`${URL_API}/members/`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
+            },
             body: JSON.stringify({
                 user: {
                     id: user.id,
@@ -64,6 +70,8 @@ export const addMember = async (user, member) => {
         });
 
         if (!response.ok) {
+            const errorText = await response.text();
+            console.error('Detalles del error:', errorText);
             throw new Error(`Error al agregar miembro: ${response.statusText}`);
         }
 
@@ -76,9 +84,12 @@ export const addMember = async (user, member) => {
 
 export const updateMember = async (id, data) => {
     try {
-        const response = await fetch(`http://localhost:8000/members/${id}/`, {
+        const response = await fetch(`${URL_API}/members/${id}/`, {
             method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
+            },
             body: JSON.stringify({
                 user: {
                     id: data.user.id,
@@ -98,7 +109,8 @@ export const updateMember = async (id, data) => {
         });
 
         if (!response.ok) {
-            throw new Error(`Error al actualizar miembro: ${response.statusText}`);
+            const errorText = await response.text(); // Esto te dará más detalles del error
+            console.error('Detalles del error:', errorText);
         }
 
         return await response.json(); 
@@ -110,12 +122,19 @@ export const updateMember = async (id, data) => {
 
 export const deleteMember = async (id) => {
     try {
-        const response = await fetch(`http://localhost:8000/members/${id}/`, {
+        const response = await fetch(`${URL_API}/members/${id}/`, {
             method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
+            }
         });
+
         if (!response.ok) {
-            throw new Error(`Error al eliminar el miembro: ${response.statusText}`);
+            const errorText = await response.text(); // Esto te dará más detalles del error
+            console.error('Detalles del error:', errorText);
         }
+
         return await response.json(); 
     } catch (error) {
         console.error('Error al eliminar el miembro:', error);
