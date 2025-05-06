@@ -37,7 +37,7 @@ import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import { addMember, deleteMember, getMembers, searchMember, updateMember } from '../api/members_api';
-import { validateCedula, validateEmail, validatePassword } from '../utils/valitations';
+import { validateCedula, validateEmail, validatePassword } from '../utils/Valitations';
 
 function TablePaginationActions(props) {
     const theme = useTheme();
