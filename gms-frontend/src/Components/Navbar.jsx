@@ -1,10 +1,19 @@
 import React, { useState } from 'react';
 import MenuIcon from '@mui/icons-material/Menu';
 import LoginIcon from '@mui/icons-material/Login';
-import { AppBar, Box, Button, Container, IconButton, Menu, MenuItem, Toolbar, Typography } from '@mui/material';
+import {
+    AppBar,
+    Box,
+    Button,
+    Container,
+    IconButton,
+    Menu,
+    MenuItem,
+    Toolbar,
+    Typography
+} from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-import logo from "/remastered.webp"
-import { logout } from './auth';
+import logo from "/remastered.webp";
 
 const pages = ['Servicios', 'Horarios', 'Ubicación'];
 
@@ -15,25 +24,43 @@ function ResponsiveAppBar() {
     const handleOpenNavMenu = (event) => {
         setAnchorElNav(event.currentTarget);
     };
-    const handleLogin = () => {
-        navigate("/login")
-    };
 
     const handleCloseNavMenu = () => {
         setAnchorElNav(null);
+    };
+
+    const handleLogin = () => {
+        navigate("/login");
+    };
+
+    const handleNavClick = (page) => {
+        handleCloseNavMenu();
+
+        const sectionMap = {
+            "Servicios": "services",
+            "Horarios": "schedule",
+            "Ubicación": "location",
+        };
+
+        const sectionId = sectionMap[page];
+        const element = document.getElementById(sectionId);
+
+        if (element) {
+            element.scrollIntoView({ behavior: "smooth" });
+        }
     };
 
     return (
         <AppBar position="static" sx={{ backgroundColor: '#000000' }}>
             <Container maxWidth="xl">
                 <Toolbar disableGutters>
-                <Box
-                component="img"
-                src={logo}
-                alt="Logo"
-                sx={{ display: { xs: 'none', md: 'flex' }, height: 40, mr: 1 }}
-                />
-            
+                    <Box
+                        component="img"
+                        src={logo}
+                        alt="Logo"
+                        sx={{ display: { xs: 'none', md: 'flex' }, height: 40, mr: 1 }}
+                    />
+
                     <Typography
                         variant="h6"
                         noWrap
@@ -52,6 +79,7 @@ function ResponsiveAppBar() {
                         GEMELOS GYM
                     </Typography>
 
+                    {/* Mobile menu */}
                     <Box sx={{ flexGrow: 1, display: { xs: 'flex', md: 'none' } }}>
                         <IconButton
                             size="large"
@@ -76,18 +104,19 @@ function ResponsiveAppBar() {
                             sx={{ display: { xs: 'block', md: 'none' } }}
                         >
                             {pages.map((page) => (
-                                <MenuItem key={page} onClick={handleCloseNavMenu}>
+                                <MenuItem key={page} onClick={() => handleNavClick(page)}>
                                     <Typography textAlign="center">{page}</Typography>
                                 </MenuItem>
                             ))}
                         </Menu>
                     </Box>
 
+                    {/* Mobile Logo */}
                     <Box
-                    component="img"
-                    src={logo}
-                    alt="Logo"
-                    sx={{ display: { xs: 'flex', md: 'none' }, height: 40, mr: 1 }}
+                        component="img"
+                        src={logo}
+                        alt="Logo"
+                        sx={{ display: { xs: 'flex', md: 'none' }, height: 40, mr: 1 }}
                     />
                     <Typography
                         variant="h5"
@@ -108,11 +137,12 @@ function ResponsiveAppBar() {
                         GEMELOS GYM
                     </Typography>
 
+                    {/* Desktop menu */}
                     <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
                         {pages.map((page) => (
                             <Button
                                 key={page}
-                                onClick={handleCloseNavMenu}
+                                onClick={() => handleNavClick(page)}
                                 sx={{ my: 2, color: 'white', display: 'block' }}
                             >
                                 {page}
@@ -120,6 +150,7 @@ function ResponsiveAppBar() {
                         ))}
                     </Box>
 
+                    {/* Login Button */}
                     <Box sx={{ flexGrow: 0 }}>
                         <Button
                             onClick={handleLogin}
@@ -128,16 +159,16 @@ function ResponsiveAppBar() {
                             sx={{
                                 backgroundColor: '#ffffff',
                                 color: '#000000',
-                                borderRadius: '50px', 
-                                textTransform: 'none', 
+                                borderRadius: '50px',
+                                textTransform: 'none',
                                 paddingX: 3,
                                 paddingY: 1,
                                 '&:hover': {
-                                    backgroundColor: '#f0f0f0', 
+                                    backgroundColor: '#f0f0f0',
                                 }
                             }}
                         >
-                            Login
+                            Ingresar
                         </Button>
                     </Box>
                 </Toolbar>

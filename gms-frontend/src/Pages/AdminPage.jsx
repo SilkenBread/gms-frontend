@@ -8,6 +8,7 @@ import HandymanIcon from '@mui/icons-material/Handyman';
 import InfoIcon from '@mui/icons-material/Info';
 import ManageMember from '../Components/ManageMembers';
 import ManageEmployees from '../Components/ManageEmployees';
+import ManagePayment from '../Components/ManagePayment';
 
 export default function AdminPage() {
   const [content, setContent] = useState(<h1>Bienvenido!</h1>);
@@ -31,7 +32,7 @@ export default function AdminPage() {
     {
       icon: <AttachMoneyIcon />,
       text: 'Pagos',
-      onClick: () => setContent(<p>Sección de pagos.</p>)
+      onClick: () => setContent(<ManagePayment/>)
     },
     {
       icon: <HandymanIcon />,

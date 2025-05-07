@@ -7,16 +7,22 @@ import Location from "../Components/Location"
 import Footer from "../Components/Footer"
 
 
-const HomePage = () =>{
-    return(
+const HomePage = () => {
+    return (
         <>
-            <ResponsiveAppBar/>
+            <ResponsiveAppBar />
             <Box>
-                <BackgroundImage/>
-                <OurServices/>
-                <Schedule/>
-                <Location/>
-                <Footer/>
+                <BackgroundImage />
+                <div id="services">
+                    <OurServices />
+                </div>
+                <div id="schedule">
+                    <Schedule />
+                </div>
+                <div id="location">
+                    <Location />
+                </div>
+                <Footer />
             </Box>
         </>
     )

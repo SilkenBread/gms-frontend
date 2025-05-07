@@ -103,7 +103,7 @@ const Schedule = () => {
                         px: 4,
                     }}
                 >
-                    Daily
+                    Diario
                 </ToggleButton>
                 <ToggleButton
                     value="weekend"
@@ -118,7 +118,7 @@ const Schedule = () => {
                         px: 4,
                     }}
                 >
-                    Weekend
+                    Fin de semena
                 </ToggleButton>
             </ToggleButtonGroup>
 
