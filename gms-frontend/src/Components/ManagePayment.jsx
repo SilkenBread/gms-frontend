@@ -4,9 +4,12 @@ import {
     Autocomplete
 } from '@mui/material';
 import { getMembers } from '../api/members_api';
+import { getMemberships } from '../api/memberships_api';
+import { addPayment } from '../api/payment_api';
 
 const ManagePayment = () => {
     const [members, setMembers] = useState([]);
+    const [paymentOptions, setPaymentOptions] = useState([]);
     const [formData, setFormData] = useState({
         cedula: '',
         nombre: '',
@@ -35,19 +38,17 @@ const ManagePayment = () => {
         fetchMembers();
     }, []);
 
-    const handleMemberSelect = (e) => {
-        const cedulaSeleccionada = e.target.value;
-        const usuario = members.find((m) => m.cedula === cedulaSeleccionada);
-
-        if (usuario) {
-            setFormData((prev) => ({
-                ...prev,
-                cedula: usuario.cedula,
-                nombre: `${usuario.nombre} ${usuario.apellido}`,
-            }));
-            setError('');
-        }
-    };
+    useEffect(() => {
+        const fetchMemberships = async () => {
+            try {
+                const response = await getMemberships();
+                setPaymentOptions(response);
+            } catch (err) {
+                console.error("Error cargando los tipos de membresía:", err);
+            }
+        };
+        fetchMemberships();
+    }, []);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -57,10 +58,17 @@ const ManagePayment = () => {
         }));
     };
 
-    const handleSubmit = (e) => {
+
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        console.log('Formulario enviado:', formData);
-        // Enviar formData al backend
+        const response = await addPayment(formData);
+    
+        if (response.success) {
+            window.alert(`Pago registrado con éxito`);
+        } else {
+            const mensaje = response.errors?.non_field_errors?.[0] || 'Error al registrar el pago';
+            window.alert(`Error: ${mensaje}`);
+        }
     };
 
     return (
@@ -106,10 +114,13 @@ const ManagePayment = () => {
                         onChange={handleChange}
                         required
                     >
-                        <MenuItem value="mensual">Mensual</MenuItem>
-                        <MenuItem value="trimestral">Trimestral</MenuItem>
-                        <MenuItem value="anual">Anual</MenuItem>
+                        {paymentOptions.map((option) => (
+                            <MenuItem key={option.id} value={option.id}>
+                                {option.name}
+                            </MenuItem>
+                        ))}
                     </TextField>
+
 
                     <TextField
                         type="date"
@@ -129,9 +140,9 @@ const ManagePayment = () => {
                         onChange={handleChange}
                         required
                     >
-                        <MenuItem value="efectivo">Efectivo</MenuItem>
-                        <MenuItem value="transferencia">Transferencia</MenuItem>
-                        <MenuItem value="tarjeta">Tarjeta</MenuItem>
+                        <MenuItem value="cash">Efectivo</MenuItem>
+                        <MenuItem value="transfer">Transferencia</MenuItem>
+                        <MenuItem value="card">Tarjeta</MenuItem>
                     </TextField>
 
                     <TextField
@@ -143,7 +154,7 @@ const ManagePayment = () => {
                         required
                     />
 
-                    <Button type="submit" variant="contained" sx={{background: '#ffd303'}}>
+                    <Button type="submit" variant="contained" sx={{ background: '#ffd303' }}>
                         Registrar
                     </Button>
                 </Stack>
