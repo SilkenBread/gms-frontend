@@ -2,8 +2,8 @@ import { Box, Container, Typography } from "@mui/material";
 
 const Location = () => (
     <Container sx={{ py: 6 }}>
-        <Typography variant="h4" gutterBottom>Ubicación</Typography>
-        <Typography>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nos encontramos en el corazón de la ciudad.</Typography>
+        <Typography variant="h3" gutterBottom>Ubicación</Typography>
+        <Typography>Estamos ubicados en una zona estratégica de la ciudad, con excelente acceso vial y transporte público cercano. Ven a entrenar sin complicaciones y con total comodidad.</Typography>
         <Box mt={3}>
             <iframe
                 title="Ubicación"

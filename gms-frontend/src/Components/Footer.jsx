@@ -5,7 +5,7 @@ import PhoneIcon from '@mui/icons-material/Phone';
 import logo from "/favicon.ico";
 
 const Footer = () => (
-    <Box sx={{ bgcolor: '#1a1a1a', py: 4, px: 2, textAlign: 'center' }}>
+    <Box sx={{ bgcolor: '#646464', py: 4, px: 2, textAlign: 'center' }}>
         <Stack spacing={2} alignItems="center" justifyContent="center">
             {/* Logo */}
             <Box component="img" src={logo} alt="Logo" sx={{ height: 30 }} />

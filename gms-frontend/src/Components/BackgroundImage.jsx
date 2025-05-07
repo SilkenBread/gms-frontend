@@ -36,8 +36,8 @@ const BackgroundImage = () => {
                 <Typography variant="h3" sx={{ fontWeight: 'bold' }}>
                     <Box component="span" sx={{ color: '#ffd303' }}>GEMELOS</Box> GYM
                 </Typography>
-                <Typography variant="subtitle1" sx={{ mt: 2 }}>
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                <Typography variant="h6" sx={{ mt: 2 }}>
+                    La diferencia entre quién eres y quién quieres ser es aquello que haces
                 </Typography>
 
             </Box>
