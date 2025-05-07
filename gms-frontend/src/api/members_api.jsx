@@ -29,9 +29,9 @@ export const searchMember = async (id) => {
                 'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
             }
         });
-
+        const data = response.json()
         if(response.ok){
-            return true
+            return data
         }
         return false
 
