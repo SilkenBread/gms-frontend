@@ -9,6 +9,8 @@ import InfoIcon from '@mui/icons-material/Info';
 import ManageMember from '../Components/ManageMembers';
 import ManageEmployees from '../Components/ManageEmployees';
 import ManagePayment from '../Components/ManagePayment';
+import PriceCheckIcon from '@mui/icons-material/PriceCheck';
+import ListPayment from '../Components/ListPayment';
 
 export default function AdminPage() {
   const [content, setContent] = useState(<h1>Bienvenido!</h1>);
@@ -33,6 +35,11 @@ export default function AdminPage() {
       icon: <AttachMoneyIcon />,
       text: 'Pagos',
       onClick: () => setContent(<ManagePayment/>)
+    },
+    {
+      icon: <PriceCheckIcon />,
+      text: 'Historial de pagos',
+      onClick: () => setContent(<ListPayment/>)
     },
     {
       icon: <HandymanIcon />,
