@@ -30,3 +30,26 @@ export const addPayment = async (data) => {
         return { success: false, errors: { detail: 'Error de red o del servidor' } };
     }
 };
+
+export const getPayments = async () => {
+    try {
+        const response = await fetch(`${URL_API}/payments/`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
+            }
+        });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error('Detalles del error:', errorText);
+        }
+        
+        const data = await response.json();
+        return data; 
+    } catch (error) {
+        console.error('Error al obtener el historial de pago:', error);
+        throw error; 
+    }
+};
