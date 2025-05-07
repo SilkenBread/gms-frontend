@@ -399,6 +399,8 @@ export default function ManageMember() {
                                 onRowsPerPageChange={handleChangeRowsPerPage}
                                 ActionsComponent={TablePaginationActions}
                                 colSpan={7}
+                                labelRowsPerPage="Filas visibles"
+                                labelDisplayedRows={({ from, to, count }) => `${from}-${to} de ${count}`}
                             />
                         </TableRow>
                     </TableFooter>

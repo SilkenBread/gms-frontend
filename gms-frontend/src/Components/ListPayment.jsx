@@ -163,6 +163,8 @@ export default function ListPayment() {
                                 onRowsPerPageChange={handleChangeRowsPerPage}
                                 ActionsComponent={TablePaginationActions}
                                 colSpan={5}
+                                labelRowsPerPage="Filas visibles"
+                                labelDisplayedRows={({ from, to, count }) => `${from}-${to} de ${count}`}
                             />
                         </TableRow>
                     </TableFooter>
