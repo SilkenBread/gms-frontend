@@ -11,6 +11,8 @@ import ManageEmployees from '../Components/ManageEmployees';
 import ManagePayment from '../Components/ManagePayment';
 import PriceCheckIcon from '@mui/icons-material/PriceCheck';
 import ListPayment from '../Components/ListPayment';
+import FormatColorTextIcon from '@mui/icons-material/FormatColorText';
+import ManageLanding from '../Components/ManageLanding';
 
 export default function AdminPage() {
   const [content, setContent] = useState(<h1>Bienvenido!</h1>);
@@ -50,6 +52,11 @@ export default function AdminPage() {
       icon: <InfoIcon />,
       text: 'Información',
       onClick: () => setContent(<p>Sección de información.</p>)
+    },
+    {
+      icon: <FormatColorTextIcon />,
+      text: 'Editar',
+      onClick: () => setContent(<ManageLanding/>)
     }
   ];
 
