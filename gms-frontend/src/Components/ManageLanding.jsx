@@ -1,11 +1,12 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
     Grid, Typography, Button, Dialog, DialogTitle, DialogContent,
     DialogActions, TextField, Box,
-    Card,CardContent, IconButton
+    Card, CardContent, IconButton
 } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
+import { addSchedule, addService, deleteSchedule, deleteService, getSchedule, getServices, updateSchedule, updateService } from '../api/landing_api';
 
 export default function ManageLanding() {
     const [horarios, setHorarios] = useState([]);
@@ -15,9 +16,58 @@ export default function ManageLanding() {
     const [form, setForm] = useState({});
     const [indexEdit, setIndexEdit] = useState(null);
 
+    const cargar = async () => {
+        try {
+            const dataServices = await getServices();
+            const dataSchedules = await getSchedule();
+            setServicios(dataServices)
+            setHorarios(dataSchedules)
+            console.log(dataSchedules);
+        } catch (err) {
+            console.log('No se pudieron cargar los miembros');
+        }
+    };
+
+    useEffect(() => {
+        cargar();
+    }, []);
+
+    const validarFormulario = () => {
+        if (tipo === 'horario') {
+            if (!form.categoria || !form.dia || !form.inicio || !form.fin) {
+                alert('Todos los campos del horario son obligatorios.');
+                return false;
+            }
+        } else {
+            if (!form.nombre || !form.descripcion) {
+                alert('Todos los campos del servicio son obligatorios.');
+                return false;
+            }
+        }
+        return true;
+    };
+
+
     const openModal = (tipo, index = null, datos = {}) => {
+        console.log(datos)
         setTipo(tipo);
-        setForm(datos);
+        // Transformar campos según el tipo
+        let formateado = {};
+
+        if (tipo === 'servicio') {
+            formateado = {
+                nombre: datos.name || '',
+                descripcion: datos.description || ''
+            };
+        } else if (tipo === 'horario') {
+            formateado = {
+                dia: datos.day || '',
+                inicio: datos.start_time || '',
+                fin: datos.end_time || '',
+                categoria: datos.day_category || ''
+            };
+        }
+        setForm(formateado);
         setIndexEdit(index);
         setOpen(true);
     };
@@ -32,38 +82,49 @@ export default function ManageLanding() {
         setForm({ ...form, [e.target.name]: e.target.value });
     };
 
-    const handleSave = () => {
-        if (tipo === 'horario') {
-            const nuevos = [...horarios];
-            if (indexEdit !== null) {
-                nuevos[indexEdit] = form;
+    const handleSave = async () => {
+        if (!validarFormulario()) return;
+
+        try {
+            let response;
+            if (tipo === 'horario') {
+                if (indexEdit !== null) {
+                    response = await updateSchedule(indexEdit, form);
+                } else {
+                    response = await addSchedule(form);
+                }
             } else {
-                nuevos.push(form);
+                if (indexEdit !== null) {
+                    response = await updateService(indexEdit, form);
+                } else {
+                    response = await addService(form);
+                }
             }
-            setHorarios(nuevos);
-        } else {
-            const nuevos = [...servicios];
-            if (indexEdit !== null) {
-                nuevos[indexEdit] = form;
-            } else {
-                nuevos.push(form);
-            }
-            setServicios(nuevos);
+            window.alert(response.message || 'Guardado correctamente');
+            cargar();
+            closeModal();
+        } catch (error) {
+            console.error(error);
+            alert('Error al guardar');
         }
-        closeModal();
     };
 
-    const handleDelete = (tipo, index) => {
-        if (tipo === 'horario') {
-            const copia = [...horarios];
-            copia.splice(index, 1);
-            setHorarios(copia);
-        } else {
-            const copia = [...servicios];
-            copia.splice(index, 1);
-            setServicios(copia);
+
+    const handleDelete = async (tipo, index) => {
+        const isConfirmed = window.confirm("¿Estás seguro de eliminar este horario?");
+        if (isConfirmed) {
+            let response;
+            if (tipo === 'horario') {
+                response = await deleteSchedule(index)
+            } else {
+                response = await deleteService(index);
+            }
+            window.alert(response.message || 'Eliminación exitosa');
+            cargar();
+            closeModal();
         }
     };
+    
 
     return (
         <Box sx={{
@@ -82,17 +143,17 @@ export default function ManageLanding() {
                     </Button>
                 </Box>
                 <Grid container spacing={2}>
-                    {servicios.map((s, i) => (
-                        <Card key={i} sx={{ mb: 2, width: '100%' }}>
+                    {servicios.map((s) => (
+                        <Card key={s.service_id} sx={{ mb: 2, width: '100%' }}>
                             <CardContent>
-                                <Typography>Nombre: {s.nombre}</Typography>
-                                <Typography>Descripción: {s.descripcion}</Typography>
+                                <Typography>Titulo: {s.name}</Typography>
+                                <Typography>Descripción: {s.description}</Typography>
                                 <Box sx={{ mt: 1 }}>
-                                    <IconButton onClick={() => openModal('servicio', i, s)}>
-                                        <EditIcon fontSize="small" color="primary"/>
+                                    <IconButton onClick={() => openModal('servicio', s.service_id, s)}>
+                                        <EditIcon fontSize="small" color="primary" />
                                     </IconButton>
-                                    <IconButton onClick={() => handleDelete('servicio', i)}>
-                                        <DeleteIcon fontSize="small" color="error"/>
+                                    <IconButton onClick={() => handleDelete('servicio', s.service_id)}>
+                                        <DeleteIcon fontSize="small" color="error" />
                                     </IconButton>
                                 </Box>
                             </CardContent>
@@ -109,19 +170,19 @@ export default function ManageLanding() {
                     </Button>
                 </Box>
                 <Grid container spacing={2}>
-                    {horarios.map((h, i) => (
-                        <Card key={i} sx={{ mb: 2, width: '100%' }}>
+                    {horarios.map((h) => (
+                        <Card key={h.schedule_id} sx={{ mb: 2, width: '100%' }}>
                             <CardContent>
-                                <Typography>Día: {h.dia}</Typography>
-                                <Typography>Inicio: {h.inicio}</Typography>
-                                <Typography>Fin: {h.fin}</Typography>
-                                <Typography>Categoría: {h.categoria}</Typography>
+                                <Typography>Día: {h.day}</Typography>
+                                <Typography>Inicio: {h.start_time}</Typography>
+                                <Typography>Fin: {h.end_time}</Typography>
+                                <Typography>Categoría: {h.day_category}</Typography>
                                 <Box sx={{ mt: 1 }}>
-                                    <IconButton onClick={() => openModal('horario', i, h)}>
-                                        <EditIcon fontSize="small" color="primary"/>
+                                    <IconButton onClick={() => openModal('horario', h.schedule_id, h)}>
+                                        <EditIcon fontSize="small" color="primary" />
                                     </IconButton>
-                                    <IconButton onClick={() => handleDelete('horario', i)}>
-                                        <DeleteIcon fontSize="small" color="error"/>
+                                    <IconButton onClick={() => handleDelete('horario', h.schedule_id)}>
+                                        <DeleteIcon fontSize="small" color="error" />
                                     </IconButton>
                                 </Box>
                             </CardContent>
@@ -167,7 +228,7 @@ export default function ManageLanding() {
                                     shrink: true,
                                 }}
                                 inputProps={{
-                                    step: 300, 
+                                    step: 300,
                                 }}
                             />
                             <TextField
@@ -183,7 +244,7 @@ export default function ManageLanding() {
                                     shrink: true,
                                 }}
                                 inputProps={{
-                                    step: 300, // pasos de 5 minutos (300 segundos)
+                                    step: 300,
                                 }}
                             />
                         </>
@@ -191,7 +252,7 @@ export default function ManageLanding() {
                         <>
                             <TextField
                                 margin="dense"
-                                label="Nombre"
+                                label="Titulo"
                                 name="nombre"
                                 fullWidth
                                 value={form.nombre || ''}
