@@ -58,6 +58,7 @@ export const addMember = async (user, member) => {
                     password: user.password,
                     name: user.name,
                     surname: user.surname,
+                    group: user.groups,
                 },
                 member: {
                     birth_date: member.birth_date,
@@ -97,6 +98,7 @@ export const updateMember = async (id, data) => {
                     password: data.user.password,
                     name: data.user.name,
                     surname: data.user.surname,
+                    group: user.groups,
                 },
                 member: {
                     birth_date: data.member.birth_date,

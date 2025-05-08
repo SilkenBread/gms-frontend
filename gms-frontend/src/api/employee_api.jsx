@@ -57,6 +57,7 @@ export const addEmployee = async (employee) => {
                     password: employee.user.password,
                     name: employee.user.name,
                     surname: employee.user.surname,
+                    group: user.groups,
                 },
                 employee: {
                     hire_date: employee.employee.hire_date,
@@ -94,6 +95,7 @@ export const updateEmployee = async (employee) => {
                     password: employee.user.password,
                     name: employee.user.name,
                     surname: employee.user.surname,
+                    group: user.groups,
                 },
                 employee: {
                     hire_date: employee.employee.hire_date,

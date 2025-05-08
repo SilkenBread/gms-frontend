@@ -42,8 +42,9 @@ const LoginPage = () => {
     
         try {
             const data = await loginUser(email,password)
+
+            console.log("Respuesta completa de la API:", data);
     
-            // Guardar en localStorage
             localStorage.setItem('accessToken', data.access);
             localStorage.setItem('refreshToken', data.refresh);
             localStorage.setItem('user', JSON.stringify(data.user));
@@ -51,7 +52,41 @@ const LoginPage = () => {
             console.log('Usuario guardado en localStorage:', localStorage.getItem('user'));
     
             const user = data.user;
+
+            console.log('Grupo del usuario:', user.groups);
+
+            /*
     
+            if (user && user.user_type) {
+                if (user.user_type === 'member') {
+                    navigate('/');
+                } else if (user.user_type === 'employee' && user.groups && user.groups.length > 0) {
+                    const role = user.groups[0]; 
+                    switch (role) {
+                        case 'administrator':
+                            navigate('/admin');
+                            break;
+                        case 'receptionist':
+                            navigate('/recepcionist');
+                            break;
+                        case 'trainer':
+                            navigate('/trainer');
+                            break;
+                        default:
+                            console.log('Error: Rol no reconocido.');
+                            navigate('/');
+                            break;
+                    }
+                } else {
+                    console.log("Error: No se pudo obtener el grupo del usuario.");
+                    navigate('/');
+                }
+            } else {
+                console.log("Error: No se pudo obtener el tipo de usuario.");
+            }
+
+            */
+
             if (user && user.user_type) {
                 switch (user.user_type) {
                     case 'employee':
@@ -68,7 +103,6 @@ const LoginPage = () => {
             } else {
                 console.log("Error: No se pudo obtener el tipo de usuario.");
             }
-    
         } catch (error) {
             setLoginError(error.message);
         }
