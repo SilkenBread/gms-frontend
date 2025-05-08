@@ -53,3 +53,27 @@ export const getMemberAttendance = async (memberId) => {
         throw error;
     }
 };
+
+
+export const getAttendanceHistory = async () => {
+    try {
+        const response = await fetch(`${URL_API}/attendance/`, {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${localStorage.getItem("accessToken")}`,
+            },
+        });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error("Detalles del error:", errorText);
+            throw new Error(`Error al obtener historial: ${response.status} ${response.statusText}`);
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error("Error al obtener historial de asistencia:", error);
+        throw error;
+    }
+};

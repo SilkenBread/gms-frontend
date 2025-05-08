@@ -5,7 +5,7 @@ import RecepcionistPage from "./Pages/RecepcionistPage";
 import TrainerPage from "./Pages/TrainerPage";
 import WorkerPage from "./Pages/WorkerPage";
 import LoginPage from "./Pages/LoginPage";
-import RegisterAccessPage from './Pages/RegisterAccessPage';
+//import RegisterAccessPage from './Pages/RegisterAccessPage';
 
 const PrivateRoute = ({ element }) => {
   const token = localStorage.getItem('accessToken');
@@ -25,7 +25,6 @@ function App() {
         <Route path="/recepcionist" element={<PrivateRoute element={<RecepcionistPage />} />}/>
         <Route path="/trainer" element={<PrivateRoute element={<TrainerPage />} />}/>
         <Route path="/worker" element={<PrivateRoute element={<WorkerPage />} />}/>
-        <Route path="/register-access" element={<PrivateRoute element={<RegisterAccessPage />} />} />
       </Routes>
     </Router>
   );

@@ -9,6 +9,7 @@ import InfoIcon from '@mui/icons-material/Info';
 import ManageMember from '../Components/ManageMembers';
 import ManageEmployees from '../Components/ManageEmployees';
 import ManagePayment from '../Components/ManagePayment';
+import AccessHistory from '../Components/AccessHistory';
 
 export default function AdminPage() {
   const [content, setContent] = useState(<h1>Bienvenido!</h1>);
@@ -27,7 +28,7 @@ export default function AdminPage() {
     {
       icon: <ExitToAppIcon />,
       text: 'Asistencia',
-      onClick: () => setContent(<p>Sección de asistencia.</p>)
+      onClick: () => setContent(<AccessHistory/>)
     },
     {
       icon: <AttachMoneyIcon />,
