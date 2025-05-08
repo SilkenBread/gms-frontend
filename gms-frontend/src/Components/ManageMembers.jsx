@@ -35,9 +35,12 @@ import KeyboardArrowRight from '@mui/icons-material/KeyboardArrowRight';
 import LastPageIcon from '@mui/icons-material/LastPage';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
+import AddIcon from '@mui/icons-material/Add';
+import HistoryIcon from '@mui/icons-material/History';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import { addMember, deleteMember, getMembers, searchMember, updateMember } from '../api/members_api';
 import { validateCedula, validateEmail, validatePassword } from '../utils/Valitations';
+import Swal from 'sweetalert2';
 
 function TablePaginationActions(props) {
     const theme = useTheme();
@@ -173,6 +176,119 @@ export default function ManageMember() {
         }
     };
 
+    const handleAttendanceMember = async (id) => {
+        const result = await Swal.fire({
+            title: '¿Estás seguro?',
+            text: "¿Estás seguro de marcar asistencia?",
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Sí, marcar',
+            cancelButtonText: 'Cancelar'
+        });
+    
+        if (result.isConfirmed) {
+            try {
+                const response = await fetch(`${import.meta.env.VITE_API_URL}/attendance/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
+                    },
+                    body: JSON.stringify({ member_id: id })
+                });
+    
+                const data = await response.json();
+    
+                if (!response.ok) {
+                    if (data.non_field_errors) {
+                        Swal.fire('Error', data.non_field_errors[0], 'error');
+                    } else {
+                        Swal.fire('Error', 'Error al marcar asistencia', 'error');
+                    }
+                    return;
+                }
+    
+                // Mensaje de éxito
+                const nombre = data.member.name + ' ' + data.member.surname;
+                const fecha = new Date(data.entry_time).toLocaleString();
+                Swal.fire(
+                    '¡Asistencia registrada!',
+                    `${nombre} registró su entrada el ${fecha}. Días restantes: ${data.days_remaining}`,
+                    'success'
+                );
+            } catch (error) {
+                console.error('Error:', error);
+                Swal.fire('Error', 'Error al marcar asistencia', 'error');
+            }
+        }
+    };
+
+    const handleHistoryAttendanceMember = async (id) => {
+        try {
+            const response = await fetch(`${import.meta.env.VITE_API_URL}/attendance/member/${id}/`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
+                }
+            });
+    
+            const data = await response.json();
+    
+            if (!response.ok) {
+                Swal.fire('Error', 'No se pudo obtener el historial de asistencia', 'error');
+                return;
+            }
+    
+            if (data.length === 0) {
+                Swal.fire('Sin registros', 'Este miembro no tiene asistencias registradas.', 'info');
+                return;
+            }
+    
+            // Generar HTML de la tabla
+            const tableRows = data.map(item => {
+                const fecha = new Date(item.entry_time).toLocaleString();
+                return `
+                    <tr>
+                        <td class="px-2 py-1 border">${item.attendance_id}</td>
+                        <td class="px-2 py-1 border">${fecha}</td>
+                        <td class="px-2 py-1 border">${item.registered_by}</td>
+                        <td class="px-2 py-1 border">${item.days_remaining}</td>
+                    </tr>
+                `;
+            }).join('');
+    
+            const tableHtml = `
+                <div style="overflow-x:auto;">
+                    <table style="width:100%;border-collapse:collapse;text-align:left;">
+                        <thead>
+                            <tr>
+                                <th class="px-2 py-1 border">ID</th>
+                                <th class="px-2 py-1 border">Fecha y hora</th>
+                                <th class="px-2 py-1 border">Registrado por</th>
+                                <th class="px-2 py-1 border">Días restantes</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${tableRows}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+    
+            Swal.fire({
+                title: 'Historial de Asistencia',
+                html: tableHtml,
+                width: '60%',
+                confirmButtonText: 'Cerrar'
+            });
+    
+        } catch (error) {
+            console.error(error);
+            Swal.fire('Error', 'Error inesperado al obtener el historial', 'error');
+        }
+    };
+
     const handleCloseModal = () => {
         setOpenModal(false);
         setIsEditMode(false);
@@ -204,27 +320,27 @@ export default function ManageMember() {
     const validateForm = async () => {
         const { id, name, surname, email, password } = formData.user;
         const { birth_date, registration_date, membership_end_date, membership_type } = formData.member;
-    
+
         // Verificar que los campos no estén vacíos
         if (!id || !name || !surname || !email || !birth_date || !membership_type || !registration_date || !membership_end_date) {
             alert("Todos los campos son obligatorios.");
             return false;
         }
-    
+
         // Validar cédula (formato)
         const cedulaValidation = validateCedula(id);
         if (cedulaValidation !== true) {
             alert(cedulaValidation);
             return false;
         }
-    
+
         // Validar correo electrónico
         const emailValidation = validateEmail(email);
         if (emailValidation !== true) {
             alert(emailValidation);
             return false;
         }
-    
+
         if (!isEditMode) {
             // Validar si ya existe un miembro con esa cédula
             const response = await searchMember(id);
@@ -232,7 +348,7 @@ export default function ManageMember() {
                 alert("Esta cédula ya existe");
                 return false;
             }
-    
+
             // Validar contraseña solo si no está en modo edición
             const passwordValidation = validatePassword(password);
             if (passwordValidation !== true) {
@@ -240,10 +356,10 @@ export default function ManageMember() {
                 return false;
             }
         }
-    
+
         return true;
     };
-    
+
 
     const handleSaveMember = async () => {
         if (!(await validateForm())) {
@@ -375,6 +491,12 @@ export default function ManageMember() {
                                         </IconButton>
                                         <IconButton onClick={() => handleDeleteMember(row.user.id)} color="error">
                                             <DeleteIcon />
+                                        </IconButton>
+                                        <IconButton onClick={() => handleAttendanceMember(row.user.id)} color="success">
+                                            <AddIcon />
+                                        </IconButton>
+                                        <IconButton onClick={() => handleHistoryAttendanceMember(row.user.id)} color="secondary">
+                                            <HistoryIcon />
                                         </IconButton>
                                     </TableCell>
                                 )}

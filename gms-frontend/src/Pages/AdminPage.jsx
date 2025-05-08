@@ -8,6 +8,7 @@ import HandymanIcon from '@mui/icons-material/Handyman';
 import InfoIcon from '@mui/icons-material/Info';
 import ManageMember from '../Components/ManageMembers';
 import ManageEmployees from '../Components/ManageEmployees';
+import ManageAttendance from '../Components/ManageAttendance';
 import ManagePayment from '../Components/ManagePayment';
 import PriceCheckIcon from '@mui/icons-material/PriceCheck';
 import ListPayment from '../Components/ListPayment';
@@ -31,7 +32,7 @@ export default function AdminPage() {
     {
       icon: <ExitToAppIcon />,
       text: 'Asistencia',
-      onClick: () => setContent(<p>Sección de asistencia.</p>)
+      onClick: () => setContent(<ManageAttendance/>)
     },
     {
       icon: <AttachMoneyIcon />,
